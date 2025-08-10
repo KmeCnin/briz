@@ -1,0 +1,23 @@
+<svg width="256" height="256" viewBox="0 0 256 256" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <!-- Fond arrondi -->
+    <rect width="256" height="256" rx="55" fill="#42A5F5"/>
+
+    <!-- Bloc de glace (partie gauche) -->
+    <path d="M45 195L45 155L118 150L120 195L45 195Z" fill="#B3E5FC"/>
+    <path d="M45 155L118 150L120 195" stroke="#4FC3F7" stroke-width="4" stroke-linejoin="round"/>
+
+    <!-- Bloc de glace (partie droite) -->
+    <path d="M211 195L211 155L138 150L136 195L211 195Z" fill="#B3E5FC"/>
+    <path d="M211 155L138 150L136 195" stroke="#4FC3F7" stroke-width="4" stroke-linejoin="round"/>
+
+    <!-- Carte -->
+    <g transform="rotate(-5 128 128)">
+        <rect x="70" y="50" width="116" height="160" rx="12" fill="white" stroke="#BDBDBD" stroke-width="2"/>
+        <!-- Lettre A (haut) -->
+        <text x="78" y="80" font-family="Arial, sans-serif" font-size="28" font-weight="bold" fill="black">A</text>
+        <!-- Coeur (haut) -->
+        <path d="M84 98 C 80 90, 90 88, 94 92 C 98 88, 108 90, 104 98 L94 108 Z" fill="#EF5350"/>
+        <!-- Grand Coeur (centre) -->
+        <path d="M128 145 C 115 125, 140 115, 155 130 C 170 115, 195 125, 182 145 L155 175 Z" fill="#EF5350" transform="translate(-27, -20)"/>
+    </g>
+</svg>
