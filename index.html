@@ -3,15 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Briz - Le jeu pour brizer la glace</title>
-    <meta name="description" content="Briz - Le jeu pour brizer la glace.">
+    <title>Briz. - Le jeu pour brizer la glace</title>
+    <meta name="description" content="Briz. - Le jeu pour brizer la glace.">
     <meta name="theme-color" content="#111827" />
     
-    <!-- Liens vers le Manifest et le Favicon -->
-    <link rel="manifest" href="manifest.json">
-    <link rel="apple-touch-icon" href="favicon.png">
-    <link rel="icon" href="favicon.png" type="image/png">
-
+    <!-- Favicon intégré -->
+    <link rel="icon" href="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjU2IiBoZWlnaHQ9IjI1NiIgdmlld0JveD0iMCAwIDI1NiAyNTYiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CiAgICA8IS0tIEZvbmQgYXJyb25kaSAtLT4KICAgIDxyZWN0IHdpZHRoPSIyNTYiIGhlaWdodD0iMjU2IiByeD0iNTUiIGZpbGw9IiM0MkE1RTUiLz4KCiAgICA8IS0tIEJsb2MgZGUgZ2xhY2UgKHBhcnRpZSBnYXVjaGUpIC0tPgogICAgPHBhdGggZD0iTTQ1IDE5NUw0NSAxNTVM MTE4IDE1MEwxMjAgMTk1TDQ1IDE5NVoiIGZpbGw9IiNCM0U1RkMiLz4KICAgIDxwYXRoIGQ9Ik00NSAxNTVMMTE4IDE1MEwxMjAgMTk1IiBzdHJva2U9IiM0RkMzRjciIHN0cm9rZS13aWR0aD0iNCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPgoKICAgIDwhLS0gQmxvYyBkZSBnbGFjZSAocGFydGllIGRyb2l0ZSkgLS0+CiAgICA8cGF0aCBkPSJNMjExIDE5NUwyMTEgMTU1TD EzOCAxNTBMMTM2IDE5NUwyMTEgMTk1WiIgZmlsbD0iI0IzRTVGQyIvPgogICAgPHBhdGggZD0iTTIxMSAxNTVMMTM4IDE1MEwxMzYgMTk1IiBzdHJva2U9IiM0RkMzRjciIHN0cm9rZS13aWR0aD0iNCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPgoKICAgIDwhLS0gQ2FydGUgLS0+CiAgICA8ZyB0cmFuc2Zvcm09InJvdGF0ZSgtNSAxMjggMTI4KSI+CiAgICAgICAgPHJlY3QgeD0iNzAiIHk9IjUwIiB3aWR0aD0iMTE2IiBoZWlnaHQ9IjE2MCIgcng9IjEyIiBmaWxsPSJ3aGl0ZSIgc3Ryb2tlPSIjQkRCREJEIiBzdHJva2Utd2lkdGg9IjIiLz4KICAgICAgICA8IS0tIExldHRyZSAgIChoYXQpIC0tPgogICAgICAgIDx0ZXh0IHg9Ijc4IiB5PSI4MCIgZm9udC1mYW1pbHk9IkFyaWFsLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjI4IiBmb250LXdlaWdodD0iYm9sZCIgZmlsbD0iYmxhY2siPkE8L3RleHQ+CiAgICAgICAgPCEtLSBDb2V1ciAoaGF1dCkgLS0+CiAgICAgICAgPHBhdGggZD0iTTg0IDk4IEMgODAgOTAsIDkwIDg4LCA5NCA5MiBDIDk4IDg4LCAxMDggOTAsIDEwNCA5OCBMOTQgMTA4IFoiIGZpbGw9IiNFRjUzNTAiLz4KICAgICAgICA8IS0tIEdyYW5kIENvZXVyIChjZW50cmUpIC0tPgogICAgICAgIDxwYXRoIGQ9Ik0xMjggMTQ1IEMgMTE1IDEyNSwgMTQwIDExNSwgMTU1IDEzMCBDIDE3MCAxMTUsIDE5NSAxMjUsIDE4MiAxNDUgTDE1NSAxNzUgWiIgZmlsbD0iI0VGNTM1MCIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoLTI3LCAtMjApIi8+CiAgICA8L2c+Cjwvc3ZnPgo=">
+    
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     
@@ -38,7 +36,7 @@
 <body>
     <div id="root"></div>
 
-    <script type="text/babel" data-presets="react">
+    <script type="text/babel">
         const { useState, useEffect, useMemo, useCallback } = React;
 
         // --- DATA: La banque de questions (Complète - 52 cartes) ---
@@ -70,7 +68,7 @@
                 '10': ["Quelle est la chose la plus difficile que tu aies dû surmonter dans une relation familiale ?", "As-tu déjà eu une relation qui a été ruinée par une différence d'âge ?", "Quel est le plus grand compromis que tu aies fait dans une relation ?", "Raconte une fois où tu as été déçu(e) par un(e) de tes politicien(ne)s préféré(e)s.", "Quelle est la chose la plus importante que tu aies apprise sur la communication ?", "As-tu déjà eu une relation qui a été ruinée par une différence de culture ?", "Quel est le plus grand défi que tu aies rencontré dans une relation professionnelle ?", "Raconte une fois où tu as été déçu(e) par un(e) de tes athlètes préféré(e)s.", "Quelle est la chose la plus importante que tu aies apprise sur le respect ?", "As-tu déjà eu une relation qui a été ruinée par un secret ?"],
                 'J': ["Quelle est la chose la plus difficile que tu aies dû apprendre sur toi-même grâce à une relation ?", "As-tu déjà eu une relation qui a été ruinée par un manque de soutien ?", "Quel est le plus grand cadeau que tu aies reçu d'une relation ?", "Raconte une fois où tu as été déçu(e) par un(e) de tes auteur(e)s préféré(e)s.", "Quelle est la chose la plus importante que tu aies apprise sur la loyauté ?", "As-tu déjà eu une relation qui a été ruinée par un manque de passion ?", "Quel est le plus grand défi que tu aies rencontré dans une relation avec toi-même ?", "Raconte une fois où tu as été déçu(e) par un(e) de tes musicien(ne)s préféré(e)s.", "Quelle est la chose la plus importante que tu aies apprise sur le pardon ?", "As-tu déjà eu une relation qui a été ruinée par un manque de vision commune ?"],
                 'Q': ["Quelle est la chose la plus difficile que tu aies dû enseigner à quelqu'un dans une relation ?", "As-tu déjà eu une relation qui a été ruinée par un manque d'intimité (non sexuelle) ?", "Quel est le plus grand obstacle que tu aies surmonté dans une relation ?", "Raconte une fois où tu as été déçu(e) par un(e) de tes acteur(rice)s préféré(e)s.", "Quelle est la chose la plus importante que tu aies apprise sur la vulnérabilité ?", "As-tu déjà eu une relation qui a été ruinée par un manque d'humour ?", "Quel est le plus grand défi que tu aies rencontré dans une relation avec la société ?", "Raconte une fois où tu as été déçu(e) par un(e) de tes réalisateur(rice)s préféré(e)s.", "Quelle est la chose la plus importante que tu aies apprise sur l'indépendance ?", "As-tu déjà eu une relation qui a été ruinée par un manque de curiosité ?"],
-                'K': ["Quelle est la chose la plus difficile que tu aies dû accepter d'une autre personne dans une relation ?", "As-tu déjà eu une relation qui a été ruinée par un manque de spontanéité ?", "Quel est le plus grand trésor que tu aies trouvé dans une relation ?", "Raconte une fois où tu as été déçu(e) par un(e) de tes peintre(sse)s préféré(e)s.", "Quelle est la chose la plus importante que tu aies apprise sur la générosité ?", "As-tu déjà eu une relation qui a été ruinée par un manque d'ambition ?", "Quel est le plus grand défi que tu aies rencontré dans une relation avec la nature ?", "Raconte une fois où tu as été déçu(e) par un(e) de tes sculpteur(rice)s préféré(e)s.", "Quelle est la chose la plus importante que tu aies apprise sur la patience ?", "As-tu déjà eu une relation qui a été ruinée par un manque de discipline ?"],
+                'K': ["Quelle est la chose la plus difficile que tu aies dû accepter d'une autre personne dans une relation ?", "As-tu déjà eu une relation qui a été ruinée par un manque de spontanéité ?", "Quel est le plus grand trésor que tu aies trouvé dans une relation ?", "Raconte une fois où tu as été déçu(e) par un(e) de tes peintre(sse)s préféré(e)s.", "Quelle est la chose la plus importante que tu aies apprise sur la générosité ?", "As-tu déjà eu une relation qui a été ruinée par un manque d'ambition ?", "Quel est le plus grand défi que tu aies rencontré dans une relation avec la nature ?", "Raconte une fois où tu as été déçu(e) par un(e) de tes sculpteur(rice)s préféré(e)s.", "Quelle est la chose la most importante que tu aies apprise sur la patience ?", "As-tu déjà eu une relation qui a été ruinée par un manque de discipline ?"],
                 'A': ["Quelle est la chose la plus difficile que tu aies dû laisser partir dans une relation ?", "As-tu déjà eu une relation qui a été ruinée par un manque de créativité ?", "Quel est le plus grand miracle que tu aies vécu dans une relation ?", "Raconte une fois où tu as été déçu(e) par un(e) de tes architectes préféré(e)s.", "Quelle est la chose la plus importante que tu aies apprise sur la gratitude ?", "As-tu déjà eu une relation qui a été ruinée par un manque de spiritualité ?", "Quel est le plus grand défi que tu aies rencontré dans une relation avec l'univers ?", "Raconte une fois où tu as été déçu(e) par un(e) de tes designer(euse)s préféré(e)s.", "Quelle est la chose la plus importante que tu aies apprise sur la vie ?", "As-tu déjà eu une relation qui a été ruinée par un manque de sens ?"]
             },
             '♠️': { // Karma : Actions immorales, coups de pute, pensées réprouvées
@@ -201,7 +199,7 @@
 
             useEffect(() => {
                 getNewQuestion('random');
-            }, []); // Correctif: tableau de dépendances vide pour n'exécuter qu'une fois au montage.
+            }, []); 
 
             return (
                 <div className="w-full max-w-2xl mx-auto p-4 flex flex-col items-center gap-4 animate-fade-in">
@@ -235,7 +233,7 @@
 
         const Menu = ({ onSelectMode, onShowRules }) => (
             <div className="w-full max-w-sm mx-auto p-6 flex flex-col items-center gap-6 animate-fade-in">
-                <header className="text-center"><h1 className="text-6xl font-black text-white tracking-tighter">Briz</h1><p className="text-indigo-300 mt-2 text-lg">Le jeu pour brizer la glace.</p></header>
+                <header className="text-center"><h1 className="text-6xl font-black text-white tracking-tighter">Briz.</h1><p className="text-indigo-300 mt-2 text-lg">Le jeu pour brizer la glace.</p></header>
                 <div className="w-full flex flex-col gap-4 mt-8">
                     <button onClick={() => onSelectMode('physical')} className="w-full bg-gray-700 hover:bg-gray-600 text-white font-bold py-4 px-4 rounded-xl text-left flex items-center gap-4"><span className="text-4xl">🃏</span><div><p className="text-lg">J'ai un jeu de cartes</p><p className="text-sm font-light text-gray-300">Utilisez vos propres cartes.</p></div></button>
                     <button onClick={() => onSelectMode('virtual')} className="w-full bg-gray-700 hover:bg-gray-600 text-white font-bold py-4 px-4 rounded-xl text-left flex items-center gap-4"><span className="text-4xl">📱</span><div><p className="text-lg">Tirage de cartes</p><p className="text-sm font-light text-gray-300">Laissez l'app gérer le tirage.</p></div></button>
@@ -274,9 +272,28 @@
 
         const ThemeModal = ({ onClose }) => (
             <div className="fixed inset-0 bg-black bg-opacity-70 flex justify-center items-center z-50 animate-fade-in-fast" onClick={onClose}>
-                <div className="bg-gray-800 rounded-2xl shadow-2xl w-full max-w-2xl p-6 m-4" onClick={e => e.stopPropagation()}>
-                    <div className="flex justify-between items-center mb-6"><h2 className="text-3xl font-bold text-white">Les Thèmes de Briz</h2><button onClick={onClose} className="text-gray-400 hover:text-white text-3xl">&times;</button></div>
-                    <div className="space-y-4">{Object.entries(THEME_DETAILS).map(([suit, details]) => (<div key={suit} className="bg-gray-700 p-4 rounded-lg"><h3 className="text-2xl font-bold flex items-center gap-3"><span className={details.color}>{suit}</span><span className="text-white">{details.name}</span></h3><p className="text-gray-300 mt-1 ml-10">{details.description}</p></div>))}</div>
+                <div className="bg-gray-800 rounded-2xl shadow-2xl w-full max-w-2xl p-6 m-4 text-white" onClick={e => e.stopPropagation()}>
+                    <div className="flex justify-between items-center mb-4">
+                        <h2 className="text-3xl font-bold">Règles du jeu</h2>
+                        <button onClick={onClose} className="text-gray-400 hover:text-white text-3xl">&times;</button>
+                    </div>
+                    <div className="overflow-y-auto max-h-[70vh] pr-2">
+                        <p className="text-gray-300 mb-6 text-lg">
+                            Briz est un jeu conçu pour apprendre à se connaître en profondeur. À tour de rôle, un joueur pioche une carte qui révèle une question personnelle. Plus la valeur de la carte est haute (du 2 à l'As), plus la question est intime. Le but est de répondre le plus honnêtement possible pour partager une anecdote, un secret ou une pensée.
+                        </p>
+                        <h3 className="text-2xl font-bold mb-4">Les Thèmes :</h3>
+                        <div className="space-y-4">
+                            {Object.entries(THEME_DETAILS).map(([suit, details]) => (
+                                <div key={suit} className="bg-gray-700 p-4 rounded-lg">
+                                    <h4 className="text-2xl font-bold flex items-center gap-3">
+                                        <span className={details.color}>{suit}</span>
+                                        <span>{details.name}</span>
+                                    </h4>
+                                    <p className="text-gray-300 mt-1 ml-10">{details.description}</p>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
                 </div>
             </div>
         );
@@ -405,7 +422,7 @@
             return (
                 <main className="bg-gray-900 min-h-screen w-full flex flex-col items-center justify-center p-4 font-sans relative">
                     <div className="absolute top-4 w-full flex justify-between items-center px-4 max-w-4xl mx-auto">
-                        {mode !== 'menu' && !isGameFinished ? (<button onClick={() => setShowResetModal(true)} className="bg-gray-700 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-full shadow-lg z-10">&larr; Menu</button>) : <div/>}
+                        {mode !== 'menu' && !isGameFinished ? (<button onClick={() => setShowResetModal(true)} className="bg-gray-700 hover:bg-gray-600 text-white font-bold py-2 pl-3 pr-4 rounded-full shadow-lg z-10 flex items-center gap-1"><svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clipRule="evenodd" /></svg>Menu</button>) : <div/>}
                         {mode === 'virtual' && !isGameFinished && (<div className="text-gray-300 text-lg font-semibold bg-gray-700 px-4 py-2 rounded-full z-10">Cartes : {deck.length}</div>)}
                         {mode !== 'menu' && history.length > 0 && !isGameFinished ? (<button onClick={() => setShowHistory(true)} className="bg-gray-700 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-full shadow-lg z-10">Historique</button>) : <div/>}
                     </div>
