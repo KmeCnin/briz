@@ -1,386 +1,424 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Briz - Le jeu pour brizer la glace</title>
+    <meta name="description" content="Briz - Le jeu pour brizer la glace.">
+    <meta name="theme-color" content="#111827" />
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- React Libraries -->
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    
+    <!-- Babel to transpile JSX in the browser -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
-// --- DATA: La banque de questions (Complète - 52 cartes) ---
-const questions = {
-    '♥️': { // Cœur : Sex, fantasme, séduction
-        '2': ["Quelle est ta plus grande insécurité physique au lit ?", "As-tu déjà eu un crush sur un personnage de fiction ?", "Quel est le compliment le plus sexy que tu aies reçu ?", "Décris ton premier baiser avec la langue.", "Quel est le film qui t'excite le plus ?", "As-tu déjà envoyé un nude par erreur ?", "Quel est ton plus grand 'turn-on' (ce qui t'allume) ?", "Et ton plus grand 'turn-off' (ce qui te refroidit) ?", "As-tu déjà eu un rêve érotique avec quelqu'un de présent à cette table ?", "Quel est le pire conseil en séduction que tu aies reçu ?"],
-        '3': ["Raconte la pire expérience sexuelle de ta vie.", "Quel est l'endroit le plus insolite où tu as fait l'amour ?", "As-tu déjà utilisé une application de rencontre ? Laquelle et pourquoi ?", "Décris le baiser le plus mémorable de ta vie.", "Quelle est la chose la plus audacieuse que tu aies faite pour séduire quelqu'un ?", "As-tu déjà eu une relation purement sexuelle (sex-friend) ?", "Quel est le fantasme que tu as honte d'avoir ?", "As-tu déjà simulé un orgasme ? Dans quel contexte ?", "Quelle est la partie du corps que tu préfères chez un partenaire ?", "As-tu déjà eu un rapport sexuel le premier soir ?"],
-        '4': ["As-tu un 'body count' (nombre de partenaires) ? Es-tu honnête à ce sujet ?", "Quelle est la pire chose qu'on t'ait dite ou faite pendant l'amour ?", "As-tu déjà eu une relation à distance ? Comment gérais-tu le manque ?", "Quel est ton plus grand regret sexuel ?", "As-tu déjà eu une relation avec quelqu'un de beaucoup plus âgé ou plus jeune ?", "Quelle est ta position sexuelle préférée ?", "Raconte une fois où tu as été surpris(e) en plein acte.", "As-tu déjà eu des sentiments pour un(e) escort ?", "Quel est le plus grand tabou sexuel que tu as brisé ?", "As-tu déjà eu une expérience sexuelle à plusieurs ?"],
-        '5': ["Autour de cette table, avec qui aurais-tu le plus de chances d'avoir une aventure d'un soir ?", "As-tu déjà été infidèle ? Raconte sans donner de nom.", "Quel est le fantasme le plus étrange que tu aies réalisé ?", "As-tu déjà eu une relation sexuelle avec quelqu'un que tu venais de rencontrer dans un bar ?", "Quelle est la chose la plus perverse que tu aimes ?", "As-tu déjà eu une relation sexuelle avec deux personnes différentes dans la même journée ?", "Raconte une fois où un rapport sexuel a été interrompu de manière embarrassante.", "As-tu déjà eu une relation avec un(e) collègue de travail ?", "Quel est le secret sexuel le plus sombre que tu n'aies jamais avoué ?", "As-tu déjà payé ou été payé(e) pour un acte sexuel ?"],
-        '6': ["Quel est le fétichisme le plus bizarre que tu aies ?", "As-tu déjà eu une relation sexuelle avec le/la partenaire d'un(e) ami(e) ?", "Raconte une expérience impliquant des sex-toys.", "As-tu déjà participé à une orgie ?", "Quelle est la chose la plus dangereuse ou risquée que tu aies faite sexuellement ?", "As-tu déjà eu une relation avec un membre de la famille de ton/ta partenaire ?", "Quel est l'acte sexuel que tu ne feras jamais, même pour un million d'euros ?", "As-tu déjà eu une expérience BDSM (Bondage, Discipline, Sado-Masochisme) ?", "Raconte une expérience sexuelle sous l'emprise de drogues.", "Quel est ton plus grand secret sexuel inavouable ?"],
-        '7': ["Quelle est la chose la plus inattendue qui t'ait excité(e) ?", "As-tu déjà menti sur tes performances ou préférences sexuelles ?", "Quel est le lieu public où tu rêves de faire l'amour ?", "Raconte une fois où tu as utilisé la séduction pour obtenir quelque chose.", "As-tu déjà eu une relation sexuelle avec quelqu'un du même sexe ?", "Quel est le message le plus coquin que tu aies envoyé ?", "Préfères-tu dominer ou être dominé(e) ?", "As-tu déjà eu une relation sexuelle avec plus d'une personne en 24h ?", "Quelle est la chose la plus 'sale' que tu aimes faire au lit ?", "As-tu déjà eu un rapport sexuel au travail ?"],
-        '8': ["As-tu déjà trompé un partenaire ? Raconte.", "Quel est le fantasme que tu as le plus de chances de réaliser un jour ?", "As-tu déjà eu une relation sexuelle avec quelqu'un que tu détestais ?", "Quelle est la chose la plus folle que tu aies faite par désir sexuel ?", "As-tu déjà contracté une IST ?", "Raconte la fois où tu as été le/la plus infidèle.", "Quel est le mensonge lié au sexe que tu as raconté le plus souvent ?", "As-tu déjà eu un rapport non protégé en connaissance de cause ?", "As-tu déjà filmé tes ébats ?", "Quelle est la chose la plus embarrassante qui te soit arrivée pendant un rapport sexuel ?"],
-        '9': ["Quelle est la chose que tu regrettes le plus d'avoir faite (ou pas faite) sexuellement ?", "As-tu déjà eu une relation sexuelle avec un(e) supérieur(e) hiérarchique ?", "Quel est le secret sexuel d'un(e) ami(e) que tu connais ?", "As-tu déjà eu une relation sexuelle avec deux personnes en même temps ?", "Quelle est la chose la plus perverse que tu aies écrite ou lue ?", "As-tu déjà eu une relation sexuelle dans la maison de tes parents pendant qu'ils étaient là ?", "Quel est l'âge de ton/ta plus jeune et plus vieux/vieille partenaire ?", "As-tu déjà eu une relation purement pour l'argent ou le statut ?", "Quelle est la chose la plus taboue que tu aies faite par curiosité ?", "As-tu déjà eu une relation sexuelle avec quelqu'un juste pour te venger de ton ex ?"],
-        '10': ["As-tu déjà eu une relation incestueuse ou une pensée à ce sujet ?", "Quelle est la chose la plus extrême que tu aies faite au lit ?", "As-tu déjà eu une relation sexuelle avec un membre de la famille de ton/ta partenaire ?", "Quel est l'acte sexuel que tu considères comme une 'limite infranchissable' ?", "As-tu déjà eu une relation sexuelle avec une personne inconsciente ou endormie ?", "Quelle est la chose la plus illégale que tu aies faite liée au sexe ?", "As-tu déjà forcé ou manipulé quelqu'un pour un acte sexuel ?", "Raconte une expérience sexuelle qui a impliqué la police.", "As-tu déjà eu une relation avec un animal ?", "Quel est le secret sexuel qui pourrait ruiner ta vie s'il était révélé ?"],
-        'J': ["Si tu devais coucher avec une personne dans cette pièce, qui serait-ce et pourquoi ?", "As-tu déjà eu un fantasme impliquant un(e) ami(e) proche ?", "Quelle célébrité choisirais-tu pour un plan à trois ?", "As-tu déjà eu une relation sexuelle dans un moyen de transport en mouvement ?", "Quelle est la chose la plus étrange que tu aies utilisée comme accessoire sexuel ?", "As-tu déjà eu une relation sexuelle en plein air ?", "Quel est le jeu de rôle sexuel de tes rêves ?", "As-tu déjà eu une relation avec des jumeaux/jumelles ?", "Quelle est la chose la plus romantique qui ait mené à un rapport sexuel ?", "As-tu déjà eu une relation sexuelle qui a duré toute une nuit ?"],
-        'Q': ["As-tu déjà eu une relation avec ton/ta meilleur(e) ami(e) ?", "Quelle est la chose la plus folle que tu aies apprise sur les préférences sexuelles d'un(e) ami(e) ?", "As-tu déjà eu une relation sexuelle avec quelqu'un qui ne parlait pas ta langue ?", "Quel est le plus grand nombre de personnes avec qui tu as couché en une semaine ?", "As-tu déjà eu une relation sexuelle dans un lieu de culte ?", "Quelle est la chose la plus inattendue qui t'ait fait atteindre l'orgasme ?", "As-tu déjà eu une relation avec une personne transgenre ?", "Quelle est la chose la plus audacieuse que tu aies dite à un partenaire au lit ?", "As-tu déjà eu une relation sexuelle avec quelqu'un que tu as payé ?", "Quelle est la chose la plus drôle qui te soit arrivée pendant le sexe ?"],
-        'K': ["As-tu déjà eu une relation avec un(e) de tes professeur(e)s ?", "Quelle est la chose la plus taboue que tu aies vue dans la pornographie ?", "As-tu déjà eu une relation sexuelle avec un(e) politicien(ne) ou une personne de pouvoir ?", "Quel est le plus grand secret que tu aies caché à un partenaire sexuel ?", "As-tu déjà eu une relation sexuelle avec un(e) membre de ta famille par alliance ?", "Quelle est la chose la plus dégoûtante que tu aies faite ou essayée sexuellement ?", "As-tu déjà eu une relation sexuelle avec un(e) athlète professionnel(le) ?", "Quel est le plus grand risque que tu aies pris pour le sexe ?", "As-tu déjà eu une relation sexuelle avec un(e) artiste célèbre ?", "Quelle est la chose la plus précieuse que tu aies échangée contre du sexe ?"],
-        'A': ["Quelle est la chose la plus importante que tu aies apprise sur toi-même grâce au sexe ?", "As-tu déjà eu une relation qui a changé ta vision de la sexualité ?", "Quel est le plus beau souvenir sexuel de ta vie ?", "As-tu déjà eu une relation où le sexe était mauvais mais les sentiments forts ?", "Quelle est la chose la plus intime que tu aies partagée avec un partenaire ?", "As-tu déjà eu une relation où le sexe était incroyable mais sans sentiments ?", "Quel est le plus grand sacrifice que tu aies fait pour ta vie sexuelle ?", "As-tu déjà eu une relation qui a commencé par le sexe et s'est transformée en amour ?", "Quelle est la chose la plus importante pour toi dans une relation sexuelle ?", "As-tu déjà eu une relation qui t'a aidé à surmonter une insécurité sexuelle ?"]
-    },
-    '♦️': { // Social : Amour (non sexuel), amis, travail, famille
-        '2': ["Quelle est la chose la plus embarrassante que tes parents aient faite devant tes amis ?", "Décris ta plus grande dispute avec un frère ou une sœur.", "Quel est le pire cadeau que tu aies reçu ?", "Raconte ta pire gaffe lors d'un entretien d'embauche.", "Qui était ton meilleur ami d'enfance et pourquoi ne l'es-tu plus ?", "Quelle est la chose la plus gentille qu'un inconnu ait faite pour toi ?", "As-tu déjà été viré(e) d'un travail ?", "Quel est le meilleur conseil que tes parents t'aient donné ?", "Raconte une fois où tu as ressenti une jalousie intense envers un(e) ami(e).", "Quel est le plus grand malentendu te concernant ?"],
-        '3': ["Quelle est la chose la plus folle que tu aies faite par amitié ?", "As-tu déjà eu le cœur brisé ? Raconte.", "Quel est le plus grand sacrifice que tu aies fait pour ta famille ?", "Raconte une fois où tu as déçu quelqu'un qui comptait sur toi.", "Qui est la personne dans ta vie qui te connaît le mieux ?", "As-tu déjà mis fin à une amitié importante ? Pourquoi ?", "Quelle est la chose que tes collègues ignorent sur toi ?", "As-tu déjà eu un coup de foudre platonique ?", "Quelle est la tradition familiale la plus étrange que vous ayez ?", "Raconte une fois où tu as défendu un(e) ami(e) bec et ongles."],
-        '4': ["Quelle est la chose que tu caches à ta famille ?", "As-tu déjà eu des sentiments amoureux pour un(e) ami(e) proche ?", "Quelle est la plus grande dispute que tu aies eue avec ton/ta meilleur(e) ami(e) ?", "Raconte une fois où tu t'es senti(e) trahi(e) par un collègue.", "Quel est le plus grand regret concernant une amitié passée ?", "As-tu déjà eu une relation toxique (amicale ou familiale) ?", "Quelle est la chose que tu admires le plus chez tes parents ?", "Raconte une fois où tu as pleuré de joie pour quelqu'un d'autre.", "Quel est le plus grand désaccord que tu aies avec tes amis sur un sujet important ?", "As-tu déjà eu à choisir entre deux amis ?"],
-        '5': ["Quelle est la plus grande trahison que tu aies vécue de la part d'un proche (ami/famille) ?", "As-tu déjà envisagé de couper les ponts avec un membre de ta famille ? Pourquoi ?", "Raconte une fois où tu as dû mentir pour protéger quelqu'un que tu aimes.", "Quelle est la chose que tu ne pardonneras jamais à un(e) ami(e) ?", "As-tu déjà été amoureux/se de quelqu'un qui ne t'aimait pas en retour ?", "Quel est le plus grand secret de famille que tu connaisses ?", "Raconte une fois où tu as été déçu(e) par ton 'héros' ou modèle.", "As-tu déjà saboté une amitié par jalousie ?", "Quelle est la conversation la plus difficile que tu aies eue avec tes parents ?", "Parmi les personnes à table, qui choisirais-tu pour t'aider à cacher un corps ?"],
-        '6': ["As-tu déjà révélé un secret confié par ton/ta meilleur(e) ami(e) ?", "Raconte une fois où tu as délibérément blessé quelqu'un que tu aimes.", "Quelle est la relation (amicale ou familiale) la plus compliquée que tu aies ?", "As-tu déjà utilisé des informations confidentielles du travail à ton avantage ?", "Quel est le plus grand reproche que tu ferais à ta famille ?", "As-tu déjà souhaité secrètement l'échec d'un(e) ami(e) ?", "Raconte une fois où tu as dû choisir entre ta carrière et une relation.", "Quelle est la chose la plus égoïste que tu aies faite qui a impacté tes proches ?", "As-tu déjà eu une relation où tu savais que tu faisais du mal à l'autre personne ?", "Quelle est la vérité la plus dure que tu aies dite à un(e) ami(e) ?"],
-        '7': ["Quelle est la chose que tu regrettes le plus dans tes relations amicales ?", "As-tu déjà eu une amitié qui s'est terminée sans explication ?", "Quel est le plus grand mensonge que tu aies dit à tes parents ?", "Raconte une fois où tu as été déçu(e) par un membre de ta famille.", "Quelle est la chose la plus courageuse que tu aies faite pour un(e) ami(e) ?", "As-tu déjà eu une relation professionnelle qui a dépassé les bornes ?", "Quel est le plus grand secret que tu aies gardé pour un(e) ami(e) ?", "Raconte une fois où tu as été témoin d'une trahison entre amis.", "Quelle est la chose la plus importante que tu aies apprise sur l'amitié ?", "As-tu déjà eu une relation qui a changé ta vie ?"],
-        '8': ["Quelle est la chose la plus difficile que tu aies dû pardonner à un(e) ami(e) ?", "As-tu déjà eu une relation qui a été ruinée par l'argent ?", "Quel est le plus grand sacrifice que tu aies fait pour ta carrière ?", "Raconte une fois où tu as été déçu(e) par un mentor ou un modèle.", "Quelle est la chose la plus importante que tu aies apprise sur la famille ?", "As-tu déjà eu une relation qui a été ruinée par la jalousie ?", "Quel est le plus grand défi que tu aies rencontré dans une relation amoureuse ?", "Raconte une fois où tu as été déçu(e) par un(e) de tes héros d'enfance.", "Quelle est la chose la plus importante que tu aies apprise sur l'amour ?", "As-tu déjà eu une relation qui a été ruinée par la distance ?"],
-        '9': ["Quelle est la chose la plus difficile que tu aies dû accepter sur toi-même dans une relation ?", "As-tu déjà eu une relation qui a été ruinée par la religion ou la politique ?", "Quel est le plus grand risque que tu aies pris pour une relation ?", "Raconte une fois où tu as été déçu(e) par un(e) de tes professeur(e)s.", "Quelle est la chose la plus importante que tu aies apprise sur le travail d'équipe ?", "As-tu déjà eu une relation qui a été ruinée par une addiction ?", "Quel est le plus grand défi que tu aies rencontré dans une amitié ?", "Raconte une fois où tu as été déçu(e) par un(e) de tes artistes préféré(e)s.", "Quelle est la chose la plus importante que tu aies apprise sur la confiance ?", "As-tu déjà eu une relation qui a été ruinée par une maladie ?"],
-        '10': ["Quelle est la chose la plus difficile que tu aies dû surmonter dans une relation familiale ?", "As-tu déjà eu une relation qui a été ruinée par une différence d'âge ?", "Quel est le plus grand compromis que tu aies fait dans une relation ?", "Raconte une fois où tu as été déçu(e) par un(e) de tes politicien(ne)s préféré(e)s.", "Quelle est la chose la plus importante que tu aies apprise sur la communication ?", "As-tu déjà eu une relation qui a été ruinée par une différence de culture ?", "Quel est le plus grand défi que tu aies rencontré dans une relation professionnelle ?", "Raconte une fois où tu as été déçu(e) par un(e) de tes athlètes préféré(e)s.", "Quelle est la chose la plus importante que tu aies apprise sur le respect ?", "As-tu déjà eu une relation qui a été ruinée par un secret ?"],
-        'J': ["Quelle est la chose la plus difficile que tu aies dû apprendre sur toi-même grâce à une relation ?", "As-tu déjà eu une relation qui a été ruinée par un manque de soutien ?", "Quel est le plus grand cadeau que tu aies reçu d'une relation ?", "Raconte une fois où tu as été déçu(e) par un(e) de tes auteur(e)s préféré(e)s.", "Quelle est la chose la plus importante que tu aies apprise sur la loyauté ?", "As-tu déjà eu une relation qui a été ruinée par un manque de passion ?", "Quel est le plus grand défi que tu aies rencontré dans une relation avec toi-même ?", "Raconte une fois où tu as été déçu(e) par un(e) de tes musicien(ne)s préféré(e)s.", "Quelle est la chose la plus importante que tu aies apprise sur le pardon ?", "As-tu déjà eu une relation qui a été ruinée par un manque de vision commune ?"],
-        'Q': ["Quelle est la chose la plus difficile que tu aies dû enseigner à quelqu'un dans une relation ?", "As-tu déjà eu une relation qui a été ruinée par un manque d'intimité (non sexuelle) ?", "Quel est le plus grand obstacle que tu aies surmonté dans une relation ?", "Raconte une fois où tu as été déçu(e) par un(e) de tes acteur(rice)s préféré(e)s.", "Quelle est la chose la plus importante que tu aies apprise sur la vulnérabilité ?", "As-tu déjà eu une relation qui a été ruinée par un manque d'humour ?", "Quel est le plus grand défi que tu aies rencontré dans une relation avec la société ?", "Raconte une fois où tu as été déçu(e) par un(e) de tes réalisateur(rice)s préféré(e)s.", "Quelle est la chose la plus importante que tu aies apprise sur l'indépendance ?", "As-tu déjà eu une relation qui a été ruinée par un manque de curiosité ?"],
-        'K': ["Quelle est la chose la plus difficile que tu aies dû accepter d'une autre personne dans une relation ?", "As-tu déjà eu une relation qui a été ruinée par un manque de spontanéité ?", "Quel est le plus grand trésor que tu aies trouvé dans une relation ?", "Raconte une fois où tu as été déçu(e) par un(e) de tes peintre(sse)s préféré(e)s.", "Quelle est la chose la plus importante que tu aies apprise sur la générosité ?", "As-tu déjà eu une relation qui a été ruinée par un manque d'ambition ?", "Quel est le plus grand défi que tu aies rencontré dans une relation avec la nature ?", "Raconte une fois où tu as été déçu(e) par un(e) de tes sculpteur(rice)s préféré(e)s.", "Quelle est la chose la plus importante que tu aies apprise sur la patience ?", "As-tu déjà eu une relation qui a été ruinée par un manque de discipline ?"],
-        'A': ["Quelle est la chose la plus difficile que tu aies dû laisser partir dans une relation ?", "As-tu déjà eu une relation qui a été ruinée par un manque de créativité ?", "Quel est le plus grand miracle que tu aies vécu dans une relation ?", "Raconte une fois où tu as été déçu(e) par un(e) de tes architectes préféré(e)s.", "Quelle est la chose la plus importante que tu aies apprise sur la gratitude ?", "As-tu déjà eu une relation qui a été ruinée par un manque de spiritualité ?", "Quel est le plus grand défi que tu aies rencontré dans une relation avec l'univers ?", "Raconte une fois où tu as été déçu(e) par un(e) de tes designer(euse)s préféré(e)s.", "Quelle est la chose la plus importante que tu aies apprise sur la vie ?", "As-tu déjà eu une relation qui a été ruinée par un manque de sens ?"]
-    },
-    '♠️': { // Karma : Actions immorales, coups de pute, pensées réprouvées
-        '2': ["As-tu déjà lu le journal intime ou les messages de quelqu'un ?", "Raconte un mensonge que tu as dit récemment.", "As-tu déjà fait semblant d'aimer un cadeau pour ne pas vexer ?", "As-tu déjà gardé la monnaie rendue en trop ?", "Quelle est la pire rumeur que tu aies propagée ?", "As-tu déjà blâmé quelqu'un d'autre pour une de tes erreurs ?", "As-tu déjà triché à un jeu ?", "Raconte une fois où tu as été incroyablement hypocrite.", "As-tu déjà fait un faux compliment ?", "As-tu déjà profité de la gentillesse de quelqu'un ?"],
-        '3': ["Raconte une fois où tu as manipulé quelqu'un pour obtenir ce que tu voulais.", "T'es-tu déjà attribué le mérite du travail d'un autre ?", "As-tu déjà délibérément rendu quelqu'un jaloux ?", "Quelle est la chose la plus méchante que tu aies faite par jalousie ?", "As-tu déjà utilisé un secret contre quelqu'un ?", "Raconte une fois où tu as agi contre tes propres principes par intérêt.", "As-tu déjà fait une promesse en sachant que tu ne la tiendrais pas ?", "As-tu déjà 'oublié' de rendre quelque chose d'important ?", "Quelle est la pensée la plus politiquement incorrecte que tu aies régulièrement ?", "As-tu déjà espionné tes voisins ?"],
-        '4': ["Quelle est la chose la plus immorale que tu aies faite pour de l'argent ?", "As-tu déjà délibérément saboté la relation (amicale/amoureuse) de quelqu'un ?", "Raconte une fois où ta lâcheté a eu de graves conséquences pour une autre personne.", "As-tu déjà profité de quelqu'un en état de faiblesse (tristesse, ivresse...) ?", "Quelle est la critique la plus cruelle que tu aies faite sur quelqu'un dans son dos ?", "As-tu déjà abandonné un ami dans le besoin ?", "Quel est le pire conseil que tu aies délibérément donné ?", "As-tu déjà souhaité la mort de quelqu'un ?", "Raconte une fois où tu as été témoin d'une injustice et que tu n'as rien fait.", "Quelle est la chose la plus sournoise que tu aies faite pour obtenir une promotion ou un avantage ?"],
-        '5': ["Quelle est la pire chose que tu aies faite et que personne ne saura jamais ?", "Si tu pouvais ruiner la vie d'une personne sans conséquence, le ferais-tu ? Qui ?", "As-tu déjà trahi la confiance de la personne qui t'en accordait le plus ?", "Raconte une fois où tu as fait du mal à quelqu'un juste pour le plaisir de le faire.", "Quelle est la pensée la plus sombre et inavouable que tu aies eue ?", "As-tu déjà fait chanter quelqu'un, même de manière subtile ?", "Quelle est la chose que tu as faite qui te fait le plus honte moralement ?", "As-tu déjà été violent(e) psychologiquement avec un partenaire ?", "Si tu pouvais revenir en arrière, quelle est la seule mauvaise action que tu effacerais ?", "Quelle est la chose la plus cruelle que tu aies faite par vengeance ?"],
-        '6': ["Quelle est la chose la plus égoïste que tu aies faite sans regret ?", "As-tu déjà menti à un sondage ou une étude ?", "Raconte une fois où tu as jugé quelqu'un sur son apparence et tu avais tort.", "Quelle est la chose la plus passive-agressive que tu aies faite cette semaine ?", "As-tu déjà ignoré quelqu'un qui te demandait de l'aide dans la rue ?", "Quelle est la chose la plus snob que tu penses secrètement ?", "As-tu déjà fait semblant de ne pas connaître quelqu'un pour éviter une conversation ?", "Raconte une fois où tu as ri d'une blague que tu trouvais blessante.", "Quelle est la chose la plus médisante que tu aies dite sur un membre de ta famille ?", "As-tu déjà profité d'une erreur en ta faveur sans le signaler ?"],
-        '7': ["Quelle est la chose la plus manipulatrice que tu aies dite à un partenaire ?", "As-tu déjà utilisé la pitié pour obtenir ce que tu voulais ?", "Raconte une fois où tu as délibérément semé la zizanie entre deux personnes.", "Quelle est la chose la plus hypocrite que tu reproches aux autres mais que tu fais toi-même ?", "As-tu déjà utilisé une information personnelle sur quelqu'un pour le discréditer ?", "Quelle est la chose la plus malhonnête que tu aies faite pour éviter une punition ?", "As-tu déjà prétendu être plus pauvre ou plus riche que tu ne l'es pour en tirer un avantage ?", "Raconte une fois où tu as délibérément exploité la gentillesse de tes parents.", "Quelle est la chose la plus sournoise que tu aies faite à un collègue ?", "As-tu déjà fait semblant d'être malade pour ne pas aller à un événement important pour un ami ?"],
-        '8': ["Quelle est la chose la plus cruelle que tu aies dite à quelqu'un en face ?", "As-tu déjà souhaité un malheur à quelqu'un et cela s'est produit ?", "Raconte une fois où tu as ressenti de la joie face à l'échec de quelqu'un (Schadenfreude).", "Quelle est la chose la plus immorale que tu aies apprise à un enfant ?", "As-tu déjà trahi un secret professionnel pour ton gain personnel ?", "Quelle est la chose la plus méprisable que tu aies faite par peur ?", "As-tu déjà encouragé quelqu'un à faire quelque chose de mal ?", "Raconte une fois où tu as délibérément ignoré un appel à l'aide.", "Quelle est la chose la plus irrespectueuse que tu aies faite envers une personne âgée ?", "As-tu déjà profité de l'ignorance de quelqu'un pour l'arnaquer, même légèrement ?"],
-        '9': ["Quelle est la pire chose que tu penses de la personne à ta gauche ?", "As-tu déjà eu une pensée violente envers quelqu'un que tu aimes ?", "Raconte une fois où tu as été raciste, sexiste ou homophobe, même en pensée.", "Quelle est la chose la plus sombre que tu aies fantasmée ?", "As-tu déjà espéré qu'un de tes proches échoue pour te sentir mieux ?", "Quelle est la chose la plus égoïste que tu ferais si tu étais invisible ?", "As-tu déjà pensé à abandonner un animal de compagnie ?", "Raconte une fois où tu as été tenté(e) de faire quelque chose de vraiment mal.", "Quelle est la chose la plus méchante que tu aies écrite sur internet sous couvert d'anonymat ?", "As-tu déjà pensé à te venger de manière disproportionnée ?"],
-        '10': ["Quelle est la chose que tu as faite qui te hantera toujours ?", "As-tu déjà été la cause directe de la rupture d'un couple ?", "Raconte une fois où tu as menti à la police de manière sérieuse.", "Quelle est la chose la plus destructrice que tu aies faite à toi-même ?", "As-tu déjà volé une idée à quelqu'un et l'as présentée comme la tienne ?", "Quelle est la chose la plus grave que tu aies cachée à ton/ta partenaire actuel(le) ?", "As-tu déjà été infidèle émotionnellement au point de blesser profondément quelqu'un ?", "Raconte une fois où tu as délibérément ruiné la réputation de quelqu'un.", "Quelle est la chose la plus proche d'un crime que tu aies commise sans être hors-la-loi ?", "As-tu déjà pensé à te suicider ?"],
-        'J': ["Si tu pouvais échanger la vie de deux personnes dans cette pièce, qui choisirais-tu ?", "Quelle est la chose la plus immorale que tu ferais pour un million d'euros ?", "As-tu déjà été attiré(e) par un criminel célèbre ?", "Raconte une fois où tu as été tenté(e) de tricher à un examen final.", "Quelle est la chose la plus méchante que tu aies faite à un animal ?", "As-tu déjà souhaité avoir un pouvoir pour faire du mal aux autres ?", "Quelle est la chose la plus égoïste que tu ferais si tu gagnais au loto ?", "Raconte une fois où tu as été tenté(e) de voler un ami.", "Quelle est la chose la plus sombre que tu aies lue ou regardée ?", "As-tu déjà pensé à rejoindre une secte ?"],
-        'Q': ["Si tu devais sacrifier une personne que tu connais pour sauver cinq inconnus, le ferais-tu ?", "Quelle est la chose la plus immorale que tu aies apprise de tes parents ?", "As-tu déjà eu une pensée intrusive que tu n'as jamais osé partager ?", "Raconte une fois où tu as été tenté(e) de saboter le travail d'un collègue.", "Quelle est la chose la plus méchante que tu aies faite à un étranger ?", "As-tu déjà souhaité une catastrophe naturelle pour éviter un événement ?", "Quelle est la chose la plus égoïste que tu ferais pour sauver ta propre vie ?", "Raconte une fois où tu as été tenté(e) de mentir sous serment.", "Quelle est la chose la plus sombre que tu aies écrite dans un journal intime ?", "As-tu déjà pensé à trahir ton pays ?"],
-        'K': ["Si tu pouvais commettre un meurtre sans être pris(e), le ferais-tu ?", "Quelle est la chose la plus immorale que tu aies faite par amour ?", "As-tu déjà eu une pensée que tu considères comme purement diabolique ?", "Raconte une fois où tu as été tenté(e) de ruiner la vie de quelqu'un.", "Quelle est la chose la plus méchante que tu aies faite à un membre de ta famille ?", "As-tu déjà souhaité une maladie grave à quelqu'un ?", "Quelle est la chose la plus égoïste que tu ferais pour protéger un secret ?", "Raconte une fois où tu as été tenté(e) de faire un faux témoignage.", "Quelle est la chose la plus sombre que tu aies jamais dite à voix haute ?", "As-tu déjà pensé à devenir un criminel ?"],
-        'A': ["Quelle est la ligne morale que tu ne franchiras jamais ?", "As-tu déjà fait quelque chose que tu considères comme impardonnable ?", "Raconte une fois où tu as été confronté(e) à un vrai dilemme moral.", "Quelle est la chose la plus méchante que tu aies faite et que tu referais ?", "As-tu déjà souhaité ne jamais être né(e) ?", "Quelle est la chose la plus égoïste que tu aies faite et dont tu es fier(e) ?", "Raconte une fois où tu as choisi le mal en toute connaissance de cause.", "Quelle est la chose la plus sombre que tu aies apprise sur la nature humaine ?", "As-tu déjà pensé à ce que tu ferais si tu n'avais plus de morale ?", "Quelle est la chose la plus importante que tu aies apprise sur le bien et le mal ?"]
-    },
-    '♣️': { // Punk : Actes illégaux ou de rébellion
-        '2': ["As-tu déjà fraudé dans les transports en commun ?", "Quelle est la chose la plus stupide que tu aies faite en étant ivre ?", "As-tu déjà triché à un examen important ?", "Raconte une fois où tu as insulté un professeur ou un supérieur hiérarchique.", "As-tu déjà téléchargé illégalement des films ou de la musique ?", "Quelle est la règle sociale que tu adores transgresser ?", "As-tu déjà participé à une manifestation ?", "As-tu déjà menti à un policier pour une petite infraction ?", "Quel est le plus petit objet que tu aies volé ?", "As-tu déjà fait un doigt d'honneur à une caméra de surveillance ?"],
-        '3': ["As-tu déjà volé dans un magasin ? Raconte.", "Quelle est la drogue la plus 'douce' que tu aies testée ?", "As-tu déjà eu une altercation physique (bagarre) ?", "Quel est l'acte de vandalisme le plus simple que tu aies commis (tag, etc.) ?", "As-tu déjà conduit sans permis ou sans assurance ?", "Raconte une fois où tu as fui une situation pour ne pas en assumer les conséquences.", "As-tu déjà menti sur un document officiel (CV, etc.) ?", "Quelle est la chose la plus rebelle que tu aies faite à l'adolescence ?", "As-tu déjà eu des ennuis avec la police ?", "As-tu déjà passé une nuit en cellule de dégrisement ?"],
-        '4': ["As-tu déjà pris le volant en état d'ivresse ou sous stupéfiants ?", "Quelle est la drogue la plus 'dure' que tu aies consommée ?", "Quel est l'objet le plus cher que tu aies volé ?", "Raconte une fois où tu as failli te faire arrêter.", "As-tu déjà commis une fraude (assurance, aides sociales...) ?", "Quel est l'acte de rébellion contre l'autorité (police, gouvernement) dont tu es le/la plus fier(e) ?", "As-tu déjà participé à une activité illégale en groupe ?", "As-tu déjà possédé une arme illégalement ?", "Raconte une fois où tu as désobéi à un ordre direct qui a eu de grosses conséquences.", "As-tu déjà aidé quelqu'un à commettre un délit ?"],
-        '5': ["Quel est l'acte illégal le plus grave que tu aies commis sans jamais te faire prendre ?", "As-tu déjà fait quelque chose qui aurait pu t'envoyer en prison pour de bon ?", "As-tu déjà été impliqué(e) dans une bagarre qui a très mal tourné ?", "As-tu déjà volé une somme d'argent importante ?", "Raconte une expérience avec le crime organisé, même de loin.", "As-tu déjà commis un délit de fuite après un accident ?", "Quelle est la chose la plus dangereuse que tu aies transportée pour quelqu'un ?", "As-tu déjà pensé à un crime parfait ? Lequel ?", "As-tu déjà été complice d'un crime grave ?", "Si tu devais enfreindre une loi maintenant, sans te faire prendre, laquelle choisirais-tu et pourquoi ?"],
-        '6': ["As-tu déjà participé à un cambriolage ?", "Quelle est la chose la plus illégale que tu aies achetée sur internet ?", "Raconte une fois où tu as été interrogé(e) par la police.", "As-tu déjà vendu de la drogue, même en petite quantité ?", "Quel est le mensonge le plus grave que tu aies dit à un juge ou un avocat ?", "As-tu déjà détruit des preuves d'un délit ?", "Raconte une fois où tu as été témoin d'un crime et que tu n'as rien dit.", "As-tu déjà utilisé une fausse identité ?", "Quelle est la chose la plus illégale que tu aies faite dans un autre pays ?", "As-tu déjà piraté un compte ou un système informatique ?"],
-        '7': ["As-tu déjà été arrêté(e) pour un crime que tu n'as pas commis ?", "Quelle est la chose la plus illégale que tu aies faite pour de l'argent ?", "Raconte une fois où tu as été menacé(e) par un criminel.", "As-tu déjà été impliqué(e) dans un accident de la route avec délit de fuite ?", "Quel est le secret le plus sombre que tu partages avec un complice ?", "As-tu déjà été témoin d'un meurtre ou d'une tentative de meurtre ?", "Raconte une fois où tu as échappé de justesse à la prison.", "As-tu déjà été membre d'un gang ou d'une organisation criminelle ?", "Quelle est la chose la plus illégale que tu aies faite par amour ?", "As-tu déjà été victime d'un chantage ?"],
-        '8': ["As-tu déjà commis un crime avec une arme ?", "Quelle est la chose la plus illégale que tu aies faite qui a blessé quelqu'un ?", "Raconte une fois où tu as été en garde à vue.", "As-tu déjà été condamné(e) par la justice ?", "Quel est le plus grand secret que tu caches à la police ?", "As-tu déjà été impliqué(e) dans un trafic (drogue, armes, etc.) ?", "Raconte une fois où tu as dû choisir entre la prison et la trahison.", "As-tu déjà été en cavale ?", "Quelle est la chose la plus illégale que tu aies faite pour protéger ta famille ?", "As-tu déjà été payé(e) pour commettre un crime ?"],
-        '9': ["As-tu déjà pensé à tuer quelqu'un ?", "Quelle est la chose la plus illégale que tu aies faite et que tu regrettes le plus ?", "Raconte une fois où tu as été complice d'un crime grave.", "As-tu déjà été en prison ?", "Quel est le plus grand secret que tu emporteras dans ta tombe ?", "As-tu déjà été impliqué(e) dans un crime qui a fait la une des journaux ?", "Raconte une fois où tu as dû faire face à la mafia ou à un gang.", "As-tu déjà été témoin d'un crime et tu as menti à la police ?", "Quelle est la chose la plus illégale que tu aies faite et dont tu es fier(e) ?", "As-tu déjà été pardonné(e) pour un crime que tu as commis ?"],
-        '10': ["Si tu pouvais commettre un crime sans être puni(e), lequel serait-ce ?", "Quelle est la chose la plus illégale que tu ferais pour sauver un être cher ?", "Raconte une fois où tu as enfreint la loi et où tu t'es senti(e) vivant(e).", "As-tu déjà rêvé de devenir un criminel célèbre ?", "Quel est le plus grand secret que tu partages avec un criminel ?", "As-tu déjà été inspiré(e) par un criminel de fiction ?", "Raconte une fois où tu as dû choisir entre la loi et la morale.", "As-tu déjà été tenté(e) de rejoindre une organisation terroriste ?", "Quelle est la chose la plus illégale que tu aies apprise à faire ?", "As-tu déjà été fier(e) d'avoir enfreint la loi ?"],
-        'J': ["Si tu devais commettre un crime avec une personne dans cette pièce, qui serait ton/ta complice ?", "Quelle est la chose la plus illégale que tu aies faite en vacances ?", "Raconte une fois où tu as été pris(e) en flagrant délit.", "As-tu déjà volé quelque chose dans un hôtel ?", "Quel est le plus grand secret que tu caches à ton/ta meilleur(e) ami(e) concernant la loi ?", "As-tu déjà conduit une voiture volée ?", "Raconte une fois où tu as dû mentir à tes parents sur une activité illégale.", "As-tu déjà triché aux impôts ?", "Quelle est la chose la plus illégale que tu aies faite pour un pari ?", "As-tu déjà été banni(e) d'un lieu public ?"],
-        'Q': ["Si tu pouvais légaliser une drogue, laquelle serait-ce ?", "Quelle est la chose la plus illégale que tu aies faite à l'école ?", "Raconte une fois où tu as été impliqué(e) dans une émeute ou une manifestation violente.", "As-tu déjà volé de l'argent à tes parents ?", "Quel est le plus grand secret que tu caches à ton/ta patron(ne) concernant la loi ?", "As-tu déjà utilisé une fausse carte d'identité ?", "Raconte une fois où tu as dû cacher quelque chose d'illégal chez toi.", "As-tu déjà fait un faux témoignage pour aider un ami ?", "Quelle est la chose la plus illégale que tu aies faite par amour ?", "As-tu déjà été arrêté(e) à l'étranger ?"],
-        'K': ["Si tu pouvais gracier un criminel célèbre, qui serait-ce ?", "Quelle est la chose la plus illégale que tu aies faite pour ta carrière ?", "Raconte une fois où tu as été menacé(e) par la police.", "As-tu déjà volé un objet de grande valeur sentimentale ?", "Quel est le plus grand secret que tu caches à tes enfants concernant la loi ?", "As-tu déjà été impliqué(e) dans un accident et tu as menti sur les circonstances ?", "Raconte une fois où tu as dû transporter quelque chose d'illégal pour quelqu'un.", "As-tu déjà fait chanter quelqu'un avec une information illégale ?", "Quelle est la chose la plus illégale que tu aies faite par vengeance ?", "As-tu déjà été condamné(e) à une peine de prison avec sursis ?"],
-        'A': ["Si tu pouvais changer une loi, laquelle serait-ce ?", "Quelle est la chose la plus illégale que tu aies faite et que tu ne regretteras jamais ?", "Raconte une fois où tu as choisi la justice plutôt que la loi.", "As-tu déjà rêvé de devenir un justicier masqué ?", "Quel est le plus grand secret que tu partages avec un avocat ?", "As-tu déjà été impliqué(e) dans une affaire judiciaire qui a duré des années ?", "Raconte une fois où tu as dû faire face à un juge.", "As-tu déjà été pardonné(e) par une victime ?", "Quelle est la chose la plus illégale que tu aies apprise de tes erreurs ?", "As-tu déjà été fier(e) d'avoir été un hors-la-loi ?"]
-    }
-};
-
-const THEME_DETAILS = {
-    '♥️': { name: 'Cœur', color: 'text-red-500', description: 'Sex, fantasmes, séduction. Tout ce qui touche à l\'intimité charnelle et au désir.' },
-    '♦️': { name: 'Social', color: 'text-red-500', description: 'Liens non-sexuels. Amour, amitié, famille, travail. Les dynamiques qui nous lient aux autres.' },
-    '♠️': { name: 'Karma', color: 'text-gray-800', description: 'Actions immorales. Coups bas, pensées inavouables, dilemmes moraux. Ce qui n\'est pas illégal, mais discutable.' },
-    '♣️': { name: 'Punk', color: 'text-gray-800', description: 'Actes illégaux ou de rébellion. Tout ce qui enfreint la loi ou défie ouvertement l\'autorité.' }
-};
-
-// --- Logique de l'application ---
-const generateDeck = () => {
-    const deck = [];
-    for (const suit in questions) {
-        for (const value in questions[suit]) {
-            deck.push({ suit, value });
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;700;900&display=swap');
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: #111827;
         }
-    }
-    for (let i = deck.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [deck[i], deck[j]] = [deck[j], deck[i]];
-    }
-    return deck;
-};
+        @keyframes fade-in { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fade-in-fast { from { opacity: 0; } to { opacity: 1; } }
+        .animate-fade-in { animation: fade-in 0.5s ease-out forwards; }
+        .animate-fade-in-fast { animation: fade-in-fast 0.2s ease-out forwards; }
+        .grid-cols-auto-fit-100 { grid-template-columns: repeat(auto-fit, minmax(60px, 1fr)); }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
 
-const Card = ({ suit, value, small = false }) => {
-    const color = THEME_DETAILS[suit].color;
-    const sizeClasses = small ? 'w-20 h-28 sm:w-24 sm:h-36' : 'w-40 h-60 sm:w-48 sm:h-72';
-    const valueSize = small ? 'text-xl' : 'text-3xl';
-    const suitCenterSize = small ? 'text-4xl' : 'text-6xl';
-    return (
-        <div className={`${sizeClasses} bg-white rounded-xl shadow-2xl flex flex-col justify-between p-2 sm:p-3 transform transition-transform duration-500 hover:scale-105 relative flex-shrink-0`}>
-            <div className={`${valueSize} font-bold ${color}`}>{value} {suit}</div>
-            <div className={`${suitCenterSize} text-center font-bold ${color} absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2`}>{suit}</div>
-            <div className={`${valueSize} font-bold ${color} self-end transform rotate-180`}>{value} {suit}</div>
-        </div>
-    );
-};
+    <script type="text/babel">
+        const { useState, useEffect, useMemo, useCallback } = React;
 
-const ThemeDisplay = ({ suit, onClick }) => {
-    const theme = THEME_DETAILS[suit];
-    return (
-        <button onClick={onClick} className="flex items-center gap-2 bg-gray-700 px-4 py-2 rounded-full hover:bg-gray-600 transition-colors">
-            <span className={`text-2xl ${theme.color}`}>{suit}</span>
-            <span className="text-white font-bold text-lg">{theme.name}</span>
-        </button>
-    );
-};
+        // --- DATA: La banque de questions (Complète - 52 cartes) ---
+        const questions = {
+            '♥️': { // Cœur : Sex, fantasme, séduction
+                '2': ["Quelle est ta plus grande insécurité physique au lit ?", "As-tu déjà eu un crush sur un personnage de fiction ?", "Quel est le compliment le plus sexy que tu aies reçu ?", "Décris ton premier baiser avec la langue.", "Quel est le film qui t'excite le plus ?", "As-tu déjà envoyé un nude par erreur ?", "Quel est ton plus grand 'turn-on' (ce qui t'allume) ?", "Et ton plus grand 'turn-off' (ce qui te refroidit) ?", "As-tu déjà eu un rêve érotique avec quelqu'un de présent à cette table ?", "Quel est le pire conseil en séduction que tu aies reçu ?"],
+                '3': ["Raconte la pire expérience sexuelle de ta vie.", "Quel est l'endroit le plus insolite où tu as fait l'amour ?", "As-tu déjà utilisé une application de rencontre ? Laquelle et pourquoi ?", "Décris le baiser le plus mémorable de ta vie.", "Quelle est la chose la plus audacieuse que tu aies faite pour séduire quelqu'un ?", "As-tu déjà eu une relation purement sexuelle (sex-friend) ?", "Quel est le fantasme que tu as honte d'avoir ?", "As-tu déjà simulé un orgasme ? Dans quel contexte ?", "Quelle est la partie du corps que tu préfères chez un partenaire ?", "As-tu déjà eu un rapport sexuel le premier soir ?"],
+                '4': ["As-tu un 'body count' (nombre de partenaires) ? Es-tu honnête à ce sujet ?", "Quelle est la pire chose qu'on t'ait dite ou faite pendant l'amour ?", "As-tu déjà eu une relation à distance ? Comment gérais-tu le manque ?", "Quel est ton plus grand regret sexuel ?", "As-tu déjà eu une relation avec quelqu'un de beaucoup plus âgé ou plus jeune ?", "Quelle est ta position sexuelle préférée ?", "Raconte une fois où tu as été surpris(e) en plein acte.", "As-tu déjà eu des sentiments pour un(e) escort ?", "Quel est le plus grand tabou sexuel que tu as brisé ?", "As-tu déjà eu une expérience sexuelle à plusieurs ?"],
+                '5': ["Autour de cette table, avec qui aurais-tu le plus de chances d'avoir une aventure d'un soir ?", "As-tu déjà été infidèle ? Raconte sans donner de nom.", "Quel est le fantasme le plus étrange que tu aies réalisé ?", "As-tu déjà eu une relation sexuelle avec quelqu'un que tu venais de rencontrer dans un bar ?", "Quelle est la chose la plus perverse que tu aimes ?", "As-tu déjà eu une relation sexuelle avec deux personnes différentes dans la même journée ?", "Raconte une fois où un rapport sexuel a été interrompu de manière embarrassante.", "As-tu déjà eu une relation avec un(e) collègue de travail ?", "Quel est le secret sexuel le plus sombre que tu n'aies jamais avoué ?", "As-tu déjà payé ou été payé(e) pour un acte sexuel ?"],
+                '6': ["Quel est le fétichisme le plus bizarre que tu aies ?", "As-tu déjà eu une relation sexuelle avec le/la partenaire d'un(e) ami(e) ?", "Raconte une expérience impliquant des sex-toys.", "As-tu déjà participé à une orgie ?", "Quelle est la chose la plus dangereuse ou risquée que tu aies faite sexuellement ?", "As-tu déjà eu une relation avec un membre de la famille de ton/ta partenaire ?", "Quel est l'acte sexuel que tu ne feras jamais, même pour un million d'euros ?", "As-tu déjà eu une expérience BDSM (Bondage, Discipline, Sado-Masochisme) ?", "Raconte une expérience sexuelle sous l'emprise de drogues.", "Quel est ton plus grand secret sexuel inavouable ?"],
+                '7': ["Quelle est la chose la plus inattendue qui t'ait excité(e) ?", "As-tu déjà menti sur tes performances ou préférences sexuelles ?", "Quel est le lieu public où tu rêves de faire l'amour ?", "Raconte une fois où tu as utilisé la séduction pour obtenir quelque chose.", "As-tu déjà eu une relation sexuelle avec quelqu'un du même sexe ?", "Quel est le message le plus coquin que tu aies envoyé ?", "Préfères-tu dominer ou être dominé(e) ?", "As-tu déjà eu une relation sexuelle avec plus d'une personne en 24h ?", "Quelle est la chose la plus 'sale' que tu aimes faire au lit ?", "As-tu déjà eu un rapport sexuel au travail ?"],
+                '8': ["As-tu déjà trompé un partenaire ? Raconte.", "Quel est le fantasme que tu as le plus de chances de réaliser un jour ?", "As-tu déjà eu une relation sexuelle avec quelqu'un que tu détestais ?", "Quelle est la chose la plus folle que tu aies faite par désir sexuel ?", "As-tu déjà contracté une IST ?", "Raconte la fois où tu as été le/la plus infidèle.", "Quel est le mensonge lié au sexe que tu as raconté le plus souvent ?", "As-tu déjà eu un rapport non protégé en connaissance de cause ?", "As-tu déjà filmé tes ébats ?", "Quelle est la chose la plus embarrassante qui te soit arrivée pendant un rapport sexuel ?"],
+                '9': ["Quelle est la chose que tu regrettes le plus d'avoir faite (ou pas faite) sexuellement ?", "As-tu déjà eu une relation sexuelle avec un(e) supérieur(e) hiérarchique ?", "Quel est le secret sexuel d'un(e) ami(e) que tu connais ?", "As-tu déjà eu une relation sexuelle avec deux personnes en même temps ?", "Quelle est la chose la plus perverse que tu aies écrite ou lue ?", "As-tu déjà eu une relation sexuelle dans la maison de tes parents pendant qu'ils étaient là ?", "Quel est l'âge de ton/ta plus jeune et plus vieux/vieille partenaire ?", "As-tu déjà eu une relation purement pour l'argent ou le statut ?", "Quelle est la chose la plus taboue que tu aies faite par curiosité ?", "As-tu déjà eu une relation sexuelle avec quelqu'un juste pour te venger de ton ex ?"],
+                '10': ["As-tu déjà eu une relation incestueuse ou une pensée à ce sujet ?", "Quelle est la chose la plus extrême que tu aies faite au lit ?", "As-tu déjà eu une relation sexuelle avec un membre de la famille de ton/ta partenaire ?", "Quel est l'acte sexuel que tu considères comme une 'limite infranchissable' ?", "As-tu déjà eu une relation sexuelle avec une personne inconsciente ou endormie ?", "Quelle est la chose la plus illégale que tu aies faite liée au sexe ?", "As-tu déjà forcé ou manipulé quelqu'un pour un acte sexuel ?", "Raconte une expérience sexuelle qui a impliqué la police.", "As-tu déjà eu une relation avec un animal ?", "Quel est le secret sexuel qui pourrait ruiner ta vie s'il était révélé ?"],
+                'J': ["Si tu devais coucher avec une personne dans cette pièce, qui serait-ce et pourquoi ?", "As-tu déjà eu un fantasme impliquant un(e) ami(e) proche ?", "Quelle célébrité choisirais-tu pour un plan à trois ?", "As-tu déjà eu une relation sexuelle dans un moyen de transport en mouvement ?", "Quelle est la chose la plus étrange que tu aies utilisée comme accessoire sexuel ?", "As-tu déjà eu une relation sexuelle en plein air ?", "Quel est le jeu de rôle sexuel de tes rêves ?", "As-tu déjà eu une relation avec des jumeaux/jumelles ?", "Quelle est la chose la plus romantique qui ait mené à un rapport sexuel ?", "As-tu déjà eu une relation sexuelle qui a duré toute une nuit ?"],
+                'Q': ["As-tu déjà eu une relation avec ton/ta meilleur(e) ami(e) ?", "Quelle est la chose la plus folle que tu aies apprise sur les préférences sexuelles d'un(e) ami(e) ?", "As-tu déjà eu une relation sexuelle avec quelqu'un qui ne parlait pas ta langue ?", "Quel est le plus grand nombre de personnes avec qui tu as couché en une semaine ?", "As-tu déjà eu une relation sexuelle dans un lieu de culte ?", "Quelle est la chose la plus inattendue qui t'ait fait atteindre l'orgasme ?", "As-tu déjà eu une relation avec une personne transgenre ?", "Quelle est la chose la plus audacieuse que tu aies dite à un partenaire au lit ?", "As-tu déjà eu une relation sexuelle avec quelqu'un que tu as payé ?", "Quelle est la chose la plus drôle qui te soit arrivée pendant le sexe ?"],
+                'K': ["As-tu déjà eu une relation avec un(e) de tes professeur(e)s ?", "Quelle est la chose la plus taboue que tu aies vue dans la pornographie ?", "As-tu déjà eu une relation sexuelle avec un(e) politicien(ne) ou une personne de pouvoir ?", "Quel est le plus grand secret que tu aies caché à un partenaire sexuel ?", "As-tu déjà eu une relation sexuelle avec un(e) membre de ta famille par alliance ?", "Quelle est la chose la plus dégoûtante que tu aies faite ou essayée sexuellement ?", "As-tu déjà eu une relation sexuelle avec un(e) athlète professionnel(le) ?", "Quel est le plus grand risque que tu aies pris pour le sexe ?", "As-tu déjà eu une relation sexuelle avec un(e) artiste célèbre ?", "Quelle est la chose la plus précieuse que tu aies échangée contre du sexe ?"],
+                'A': ["Quelle est la chose la plus importante que tu aies apprise sur toi-même grâce au sexe ?", "As-tu déjà eu une relation qui a changé ta vision de la sexualité ?", "Quel est le plus beau souvenir sexuel de ta vie ?", "As-tu déjà eu une relation où le sexe était mauvais mais les sentiments forts ?", "Quelle est la chose la plus intime que tu aies partagée avec un partenaire ?", "As-tu déjà eu une relation où le sexe était incroyable mais sans sentiments ?", "Quel est le plus grand sacrifice que tu aies fait pour ta vie sexuelle ?", "As-tu déjà eu une relation qui a commencé par le sexe et s'est transformée en amour ?", "Quelle est la chose la plus importante pour toi dans une relation sexuelle ?", "As-tu déjà eu une relation qui t'a aidé à surmonter une insécurité sexuelle ?"]
+            },
+            '♦️': { // Social : Amour (non sexuel), amis, travail, famille
+                '2': ["Quelle est la chose la plus embarrassante que tes parents aient faite devant tes amis ?", "Décris ta plus grande dispute avec un frère ou une sœur.", "Quel est le pire cadeau que tu aies reçu ?", "Raconte ta pire gaffe lors d'un entretien d'embauche.", "Qui était ton meilleur ami d'enfance et pourquoi ne l'es-tu plus ?", "Quelle est la chose la plus gentille qu'un inconnu ait faite pour toi ?", "As-tu déjà été viré(e) d'un travail ?", "Quel est le meilleur conseil que tes parents t'aient donné ?", "Raconte une fois où tu as ressenti une jalousie intense envers un(e) ami(e).", "Quel est le plus grand malentendu te concernant ?"],
+                '3': ["Quelle est la chose la plus folle que tu aies faite par amitié ?", "As-tu déjà eu le cœur brisé ? Raconte.", "Quel est le plus grand sacrifice que tu aies fait pour ta famille ?", "Raconte une fois où tu as déçu quelqu'un qui comptait sur toi.", "Qui est la personne dans ta vie qui te connaît le mieux ?", "As-tu déjà mis fin à une amitié importante ? Pourquoi ?", "Quelle est la chose que tes collègues ignorent sur toi ?", "As-tu déjà eu un coup de foudre platonique ?", "Quelle est la tradition familiale la plus étrange que vous ayez ?", "Raconte une fois où tu as défendu un(e) ami(e) bec et ongles."],
+                '4': ["Quelle est la chose que tu caches à ta famille ?", "As-tu déjà eu des sentiments amoureux pour un(e) ami(e) proche ?", "Quelle est la plus grande dispute que tu aies eue avec ton/ta meilleur(e) ami(e) ?", "Raconte une fois où tu t'es senti(e) trahi(e) par un collègue.", "Quel est le plus grand regret concernant une amitié passée ?", "As-tu déjà eu une relation toxique (amicale ou familiale) ?", "Quelle est la chose que tu admires le plus chez tes parents ?", "Raconte une fois où tu as pleuré de joie pour quelqu'un d'autre.", "Quel est le plus grand désaccord que tu aies avec tes amis sur un sujet important ?", "As-tu déjà eu à choisir entre deux amis ?"],
+                '5': ["Quelle est la plus grande trahison que tu aies vécue de la part d'un proche (ami/famille) ?", "As-tu déjà envisagé de couper les ponts avec un membre de ta famille ? Pourquoi ?", "Raconte une fois où tu as dû mentir pour protéger quelqu'un que tu aimes.", "Quelle est la chose que tu ne pardonneras jamais à un(e) ami(e) ?", "As-tu déjà été amoureux/se de quelqu'un qui ne t'aimait pas en retour ?", "Quel est le plus grand secret de famille que tu connaisses ?", "Raconte une fois où tu as été déçu(e) par ton 'héros' ou modèle.", "As-tu déjà saboté une amitié par jalousie ?", "Quelle est la conversation la plus difficile que tu aies eue avec tes parents ?", "Parmi les personnes à table, qui choisirais-tu pour t'aider à cacher un corps ?"],
+                '6': ["As-tu déjà révélé un secret confié par ton/ta meilleur(e) ami(e) ?", "Raconte une fois où tu as délibérément blessé quelqu'un que tu aimes.", "Quelle est la relation (amicale ou familiale) la plus compliquée que tu aies ?", "As-tu déjà utilisé des informations confidentielles du travail à ton avantage ?", "Quel est le plus grand reproche que tu ferais à ta famille ?", "As-tu déjà souhaité secrètement l'échec d'un(e) ami(e) ?", "Raconte une fois où tu as dû choisir entre ta carrière et une relation.", "Quelle est la chose la plus égoïste que tu aies faite qui a impacté tes proches ?", "As-tu déjà eu une relation où tu savais que tu faisais du mal à l'autre personne ?", "Quelle est la vérité la plus dure que tu aies dite à un(e) ami(e) ?"],
+                '7': ["Quelle est la chose que tu regrettes le plus dans tes relations amicales ?", "As-tu déjà eu une amitié qui s'est terminée sans explication ?", "Quel est le plus grand mensonge que tu aies dit à tes parents ?", "Raconte une fois où tu as été déçu(e) par un membre de ta famille.", "Quelle est la chose la plus courageuse que tu aies faite pour un(e) ami(e) ?", "As-tu déjà eu une relation professionnelle qui a dépassé les bornes ?", "Quel est le plus grand secret que tu aies gardé pour un(e) ami(e) ?", "Raconte une fois où tu as été témoin d'une trahison entre amis.", "Quelle est la chose la plus importante que tu aies apprise sur l'amitié ?", "As-tu déjà eu une relation qui a changé ta vie ?"],
+                '8': ["Quelle est la chose la plus difficile que tu aies dû pardonner à un(e) ami(e) ?", "As-tu déjà eu une relation qui a été ruinée par l'argent ?", "Quel est le plus grand sacrifice que tu aies fait pour ta carrière ?", "Raconte une fois où tu as été déçu(e) par un mentor ou un modèle.", "Quelle est la chose la plus importante que tu aies apprise sur la famille ?", "As-tu déjà eu une relation qui a été ruinée par la jalousie ?", "Quel est le plus grand défi que tu aies rencontré dans une relation amoureuse ?", "Raconte une fois où tu as été déçu(e) par un(e) de tes héros d'enfance.", "Quelle est la chose la plus importante que tu aies apprise sur l'amour ?", "As-tu déjà eu une relation qui a été ruinée par la distance ?"],
+                '9': ["Quelle est la chose la plus difficile que tu aies dû accepter sur toi-même dans une relation ?", "As-tu déjà eu une relation qui a été ruinée par la religion ou la politique ?", "Quel est le plus grand risque que tu aies pris pour une relation ?", "Raconte une fois où tu as été déçu(e) par un(e) de tes professeur(e)s.", "Quelle est la chose la plus importante que tu aies apprise sur le travail d'équipe ?", "As-tu déjà eu une relation qui a été ruinée par une addiction ?", "Quel est le plus grand défi que tu aies rencontré dans une amitié ?", "Raconte une fois où tu as été déçu(e) par un(e) de tes artistes préféré(e)s.", "Quelle est la chose la plus importante que tu aies apprise sur la confiance ?", "As-tu déjà eu une relation qui a été ruinée par une maladie ?"],
+                '10': ["Quelle est la chose la plus difficile que tu aies dû surmonter dans une relation familiale ?", "As-tu déjà eu une relation qui a été ruinée par une différence d'âge ?", "Quel est le plus grand compromis que tu aies fait dans une relation ?", "Raconte une fois où tu as été déçu(e) par un(e) de tes politicien(ne)s préféré(e)s.", "Quelle est la chose la plus importante que tu aies apprise sur la communication ?", "As-tu déjà eu une relation qui a été ruinée par une différence de culture ?", "Quel est le plus grand défi que tu aies rencontré dans une relation professionnelle ?", "Raconte une fois où tu as été déçu(e) par un(e) de tes athlètes préféré(e)s.", "Quelle est la chose la plus importante que tu aies apprise sur le respect ?", "As-tu déjà eu une relation qui a été ruinée par un secret ?"],
+                'J': ["Quelle est la chose la plus difficile que tu aies dû apprendre sur toi-même grâce à une relation ?", "As-tu déjà eu une relation qui a été ruinée par un manque de soutien ?", "Quel est le plus grand cadeau que tu aies reçu d'une relation ?", "Raconte une fois où tu as été déçu(e) par un(e) de tes auteur(e)s préféré(e)s.", "Quelle est la chose la plus importante que tu aies apprise sur la loyauté ?", "As-tu déjà eu une relation qui a été ruinée par un manque de passion ?", "Quel est le plus grand défi que tu aies rencontré dans une relation avec toi-même ?", "Raconte une fois où tu as été déçu(e) par un(e) de tes musicien(ne)s préféré(e)s.", "Quelle est la chose la plus importante que tu aies apprise sur le pardon ?", "As-tu déjà eu une relation qui a été ruinée par un manque de vision commune ?"],
+                'Q': ["Quelle est la chose la plus difficile que tu aies dû enseigner à quelqu'un dans une relation ?", "As-tu déjà eu une relation qui a été ruinée par un manque d'intimité (non sexuelle) ?", "Quel est le plus grand obstacle que tu aies surmonté dans une relation ?", "Raconte une fois où tu as été déçu(e) par un(e) de tes acteur(rice)s préféré(e)s.", "Quelle est la chose la plus importante que tu aies apprise sur la vulnérabilité ?", "As-tu déjà eu une relation qui a été ruinée par un manque d'humour ?", "Quel est le plus grand défi que tu aies rencontré dans une relation avec la société ?", "Raconte une fois où tu as été déçu(e) par un(e) de tes réalisateur(rice)s préféré(e)s.", "Quelle est la chose la plus importante que tu aies apprise sur l'indépendance ?", "As-tu déjà eu une relation qui a été ruinée par un manque de curiosité ?"],
+                'K': ["Quelle est la chose la plus difficile que tu aies dû accepter d'une autre personne dans une relation ?", "As-tu déjà eu une relation qui a été ruinée par un manque de spontanéité ?", "Quel est le plus grand trésor que tu aies trouvé dans une relation ?", "Raconte une fois où tu as été déçu(e) par un(e) de tes peintre(sse)s préféré(e)s.", "Quelle est la chose la plus importante que tu aies apprise sur la générosité ?", "As-tu déjà eu une relation qui a été ruinée par un manque d'ambition ?", "Quel est le plus grand défi que tu aies rencontré dans une relation avec la nature ?", "Raconte une fois où tu as été déçu(e) par un(e) de tes sculpteur(rice)s préféré(e)s.", "Quelle est la chose la plus importante que tu aies apprise sur la patience ?", "As-tu déjà eu une relation qui a été ruinée par un manque de discipline ?"],
+                'A': ["Quelle est la chose la plus difficile que tu aies dû laisser partir dans une relation ?", "As-tu déjà eu une relation qui a été ruinée par un manque de créativité ?", "Quel est le plus grand miracle que tu aies vécu dans une relation ?", "Raconte une fois où tu as été déçu(e) par un(e) de tes architectes préféré(e)s.", "Quelle est la chose la plus importante que tu aies apprise sur la gratitude ?", "As-tu déjà eu une relation qui a été ruinée par un manque de spiritualité ?", "Quel est le plus grand défi que tu aies rencontré dans une relation avec l'univers ?", "Raconte une fois où tu as été déçu(e) par un(e) de tes designer(euse)s préféré(e)s.", "Quelle est la chose la plus importante que tu aies apprise sur la vie ?", "As-tu déjà eu une relation qui a été ruinée par un manque de sens ?"]
+            },
+            '♠️': { // Karma : Actions immorales, coups de pute, pensées réprouvées
+                '2': ["As-tu déjà lu le journal intime ou les messages de quelqu'un ?", "Raconte un mensonge que tu as dit récemment.", "As-tu déjà fait semblant d'aimer un cadeau pour ne pas vexer ?", "As-tu déjà gardé la monnaie rendue en trop ?", "Quelle est la pire rumeur que tu aies propagée ?", "As-tu déjà blâmé quelqu'un d'autre pour une de tes erreurs ?", "As-tu déjà triché à un jeu ?", "Raconte une fois où tu as été incroyablement hypocrite.", "As-tu déjà fait un faux compliment ?", "As-tu déjà profité de la gentillesse de quelqu'un ?"],
+                '3': ["Raconte une fois où tu as manipulé quelqu'un pour obtenir ce que tu voulais.", "T'es-tu déjà attribué le mérite du travail d'un autre ?", "As-tu déjà délibérément rendu quelqu'un jaloux ?", "Quelle est la chose la plus méchante que tu aies faite par jalousie ?", "As-tu déjà utilisé un secret contre quelqu'un ?", "Raconte une fois où tu as agi contre tes propres principes par intérêt.", "As-tu déjà fait une promesse en sachant que tu ne la tiendrais pas ?", "As-tu déjà 'oublié' de rendre quelque chose d'important ?", "Quelle est la pensée la plus politiquement incorrecte que tu aies régulièrement ?", "As-tu déjà espionné tes voisins ?"],
+                '4': ["Quelle est la chose la plus immorale que tu aies faite pour de l'argent ?", "As-tu déjà délibérément saboté la relation (amicale/amoureuse) de quelqu'un ?", "Raconte une fois où ta lâcheté a eu de graves conséquences pour une autre personne.", "As-tu déjà profité de quelqu'un en état de faiblesse (tristesse, ivresse...) ?", "Quelle est la critique la plus cruelle que tu aies faite sur quelqu'un dans son dos ?", "As-tu déjà abandonné un ami dans le besoin ?", "Quel est le pire conseil que tu aies délibérément donné ?", "As-tu déjà souhaité la mort de quelqu'un ?", "Raconte une fois où tu as été témoin d'une injustice et que tu n'as rien fait.", "Quelle est la chose la plus sournoise que tu aies faite pour obtenir une promotion ou un avantage ?"],
+                '5': ["Quelle est la pire chose que tu aies faite et que personne ne saura jamais ?", "Si tu pouvais ruiner la vie d'une personne sans conséquence, le ferais-tu ? Qui ?", "As-tu déjà trahi la confiance de la personne qui t'en accordait le plus ?", "Raconte une fois où tu as fait du mal à quelqu'un juste pour le plaisir de le faire.", "Quelle est la pensée la plus sombre et inavouable que tu aies eue ?", "As-tu déjà fait chanter quelqu'un, même de manière subtile ?", "Quelle est la chose que tu as faite qui te fait le plus honte moralement ?", "As-tu déjà été violent(e) psychologiquement avec un partenaire ?", "Si tu pouvais revenir en arrière, quelle est la seule mauvaise action que tu effacerais ?", "Quelle est la chose la plus cruelle que tu aies faite par vengeance ?"],
+                '6': ["Quelle est la chose la plus égoïste que tu aies faite sans regret ?", "As-tu déjà menti à un sondage ou une étude ?", "Raconte une fois où tu as jugé quelqu'un sur son apparence et tu avais tort.", "Quelle est la chose la plus passive-agressive que tu aies faite cette semaine ?", "As-tu déjà ignoré quelqu'un qui te demandait de l'aide dans la rue ?", "Quelle est la chose la plus snob que tu penses secrètement ?", "As-tu déjà fait semblant de ne pas connaître quelqu'un pour éviter une conversation ?", "Raconte une fois où tu as ri d'une blague que tu trouvais blessante.", "Quelle est la chose la plus médisante que tu aies dite sur un membre de ta famille ?", "As-tu déjà profité d'une erreur en ta faveur sans le signaler ?"],
+                '7': ["Quelle est la chose la plus manipulatrice que tu aies dite à un partenaire ?", "As-tu déjà utilisé la pitié pour obtenir ce que tu voulais ?", "Raconte une fois où tu as délibérément semé la zizanie entre deux personnes.", "Quelle est la chose la plus hypocrite que tu reproches aux autres mais que tu fais toi-même ?", "As-tu déjà utilisé une information personnelle sur quelqu'un pour le discréditer ?", "Quelle est la chose la plus malhonnête que tu aies faite pour éviter une punition ?", "As-tu déjà prétendu être plus pauvre ou plus riche que tu ne l'es pour en tirer un avantage ?", "Raconte une fois où tu as délibérément exploité la gentillesse de tes parents.", "Quelle est la chose la plus sournoise que tu aies faite à un collègue ?", "As-tu déjà fait semblant d'être malade pour ne pas aller à un événement important pour un ami ?"],
+                '8': ["Quelle est la chose la plus cruelle que tu aies dite à quelqu'un en face ?", "As-tu déjà souhaité un malheur à quelqu'un et cela s'est produit ?", "Raconte une fois où tu as ressenti de la joie face à l'échec de quelqu'un (Schadenfreude).", "Quelle est la chose la plus immorale que tu aies apprise à un enfant ?", "As-tu déjà trahi un secret professionnel pour ton gain personnel ?", "Quelle est la chose la plus méprisable que tu aies faite par peur ?", "As-tu déjà encouragé quelqu'un à faire quelque chose de mal ?", "Raconte une fois où tu as délibérément ignoré un appel à l'aide.", "Quelle est la chose la plus irrespectueuse que tu aies faite envers une personne âgée ?", "As-tu déjà profité de l'ignorance de quelqu'un pour l'arnaquer, même légèrement ?"],
+                '9': ["Quelle est la pire chose que tu penses de la personne à ta gauche ?", "As-tu déjà eu une pensée violente envers quelqu'un que tu aimes ?", "Raconte une fois où tu as été raciste, sexiste ou homophobe, même en pensée.", "Quelle est la chose la plus sombre que tu aies fantasmée ?", "As-tu déjà espéré qu'un de tes proches échoue pour te sentir mieux ?", "Quelle est la chose la plus égoïste que tu ferais si tu étais invisible ?", "As-tu déjà pensé à abandonner un animal de compagnie ?", "Raconte une fois où tu as été tenté(e) de faire quelque chose de vraiment mal.", "Quelle est la chose la plus méchante que tu aies écrite sur internet sous couvert d'anonymat ?", "As-tu déjà pensé à te venger de manière disproportionnée ?"],
+                '10': ["Quelle est la chose que tu as faite qui te hantera toujours ?", "As-tu déjà été la cause directe de la rupture d'un couple ?", "Raconte une fois où tu as menti à la police de manière sérieuse.", "Quelle est la chose la plus destructrice que tu aies faite à toi-même ?", "As-tu déjà volé une idée à quelqu'un et l'as présentée comme la tienne ?", "Quelle est la chose la plus grave que tu aies cachée à ton/ta partenaire actuel(le) ?", "As-tu déjà été infidèle émotionnellement au point de blesser profondément quelqu'un ?", "Raconte une fois où tu as délibérément ruiné la réputation de quelqu'un.", "Quelle est la chose la plus proche d'un crime que tu aies commise sans être hors-la-loi ?", "As-tu déjà pensé à te suicider ?"],
+                'J': ["Si tu pouvais échanger la vie de deux personnes dans cette pièce, qui choisirais-tu ?", "Quelle est la chose la plus immorale que tu ferais pour un million d'euros ?", "As-tu déjà été attiré(e) par un criminel célèbre ?", "Raconte une fois où tu as été tenté(e) de tricher à un examen final.", "Quelle est la chose la plus méchante que tu aies faite à un animal ?", "As-tu déjà souhaité avoir un pouvoir pour faire du mal aux autres ?", "Quelle est la chose la plus égoïste que tu ferais si tu gagnais au loto ?", "Raconte une fois où tu as été tenté(e) de voler un ami.", "Quelle est la chose la plus sombre que tu aies lue ou regardée ?", "As-tu déjà pensé à rejoindre une secte ?"],
+                'Q': ["Si tu devais sacrifier une personne que tu connais pour sauver cinq inconnus, le ferais-tu ?", "Quelle est la chose la plus immorale que tu aies apprise de tes parents ?", "As-tu déjà eu une pensée intrusive que tu n'as jamais osé partager ?", "Raconte une fois où tu as été tenté(e) de saboter le travail d'un collègue.", "Quelle est la chose la plus méchante que tu aies faite à un étranger ?", "As-tu déjà souhaité une catastrophe naturelle pour éviter un événement ?", "Quelle est la chose la plus égoïste que tu ferais pour sauver ta propre vie ?", "Raconte une fois où tu as été tenté(e) de mentir sous serment.", "Quelle est la chose la plus sombre que tu aies écrite dans un journal intime ?", "As-tu déjà pensé à trahir ton pays ?"],
+                'K': ["Si tu pouvais commettre un meurtre sans être pris(e), le ferais-tu ?", "Quelle est la chose la plus immorale que tu aies faite par amour ?", "As-tu déjà eu une pensée que tu considères comme purement diabolique ?", "Raconte une fois où tu as été tenté(e) de ruiner la vie de quelqu'un.", "Quelle est la chose la plus méchante que tu aies faite à un membre de ta famille ?", "As-tu déjà souhaité une maladie grave à quelqu'un ?", "Quelle est la chose la plus égoïste que tu ferais pour protéger un secret ?", "Raconte une fois où tu as été tenté(e) de faire un faux témoignage.", "Quelle est la chose la plus sombre que tu aies jamais dite à voix haute ?", "As-tu déjà pensé à devenir un criminel ?"],
+                'A': ["Quelle est la ligne morale que tu ne franchiras jamais ?", "As-tu déjà fait quelque chose que tu considères comme impardonnable ?", "Raconte une fois où tu as été confronté(e) à un vrai dilemme moral.", "Quelle est la chose la plus méchante que tu aies faite et que tu referais ?", "As-tu déjà souhaité ne jamais être né(e) ?", "Quelle est la chose la plus égoïste que tu aies faite et dont tu es fier(e) ?", "Raconte une fois où tu as choisi le mal en toute connaissance de cause.", "Quelle est la chose la plus sombre que tu aies apprise sur la nature humaine ?", "As-tu déjà pensé à ce que tu ferais si tu n'avais plus de morale ?", "Quelle est la chose la plus importante que tu aies apprise sur le bien et le mal ?"]
+            },
+            '♣️': { // Punk : Actes illégaux ou de rébellion
+                '2': ["As-tu déjà fraudé dans les transports en commun ?", "Quelle est la chose la plus stupide que tu aies faite en étant ivre ?", "As-tu déjà triché à un examen important ?", "Raconte une fois où tu as insulté un professeur ou un supérieur hiérarchique.", "As-tu déjà téléchargé illégalement des films ou de la musique ?", "Quelle est la règle sociale que tu adores transgresser ?", "As-tu déjà participé à une manifestation ?", "As-tu déjà menti à un policier pour une petite infraction ?", "Quel est le plus petit objet que tu aies volé ?", "As-tu déjà fait un doigt d'honneur à une caméra de surveillance ?"],
+                '3': ["As-tu déjà volé dans un magasin ? Raconte.", "Quelle est la drogue la plus 'douce' que tu aies testée ?", "As-tu déjà eu une altercation physique (bagarre) ?", "Quel est l'acte de vandalisme le plus simple que tu aies commis (tag, etc.) ?", "As-tu déjà conduit sans permis ou sans assurance ?", "Raconte une fois où tu as fui une situation pour ne pas en assumer les conséquences.", "As-tu déjà menti sur un document officiel (CV, etc.) ?", "Quelle est la chose la plus rebelle que tu aies faite à l'adolescence ?", "As-tu déjà eu des ennuis avec la police ?", "As-tu déjà passé une nuit en cellule de dégrisement ?"],
+                '4': ["As-tu déjà pris le volant en état d'ivresse ou sous stupéfiants ?", "Quelle est la drogue la plus 'dure' que tu aies consommée ?", "Quel est l'objet le plus cher que tu aies volé ?", "Raconte une fois où tu as failli te faire arrêter.", "As-tu déjà commis une fraude (assurance, aides sociales...) ?", "Quel est l'acte de rébellion contre l'autorité (police, gouvernement) dont tu es le/la plus fier(e) ?", "As-tu déjà participé à une activité illégale en groupe ?", "As-tu déjà possédé une arme illégalement ?", "Raconte une fois où tu as désobéi à un ordre direct qui a eu de grosses conséquences.", "As-tu déjà aidé quelqu'un à commettre un délit ?"],
+                '5': ["Quel est l'acte illégal le plus grave que tu aies commis sans jamais te faire prendre ?", "As-tu déjà fait quelque chose qui aurait pu t'envoyer en prison pour de bon ?", "As-tu déjà été impliqué(e) dans une bagarre qui a très mal tourné ?", "As-tu déjà volé une somme d'argent importante ?", "Raconte une expérience avec le crime organisé, même de loin.", "As-tu déjà commis un délit de fuite après un accident ?", "Quelle est la chose la plus dangereuse que tu aies transportée pour quelqu'un ?", "As-tu déjà pensé à un crime parfait ? Lequel ?", "As-tu déjà été complice d'un crime grave ?", "Si tu devais enfreindre une loi maintenant, sans te faire prendre, laquelle choisirais-tu et pourquoi ?"],
+                '6': ["As-tu déjà participé à un cambriolage ?", "Quelle est la chose la plus illégale que tu aies achetée sur internet ?", "Raconte une fois où tu as été interrogé(e) par la police.", "As-tu déjà vendu de la drogue, même en petite quantité ?", "Quel est le mensonge le plus grave que tu aies dit à un juge ou un avocat ?", "As-tu déjà détruit des preuves d'un délit ?", "Raconte une fois où tu as été témoin d'un crime et que tu n'as rien dit.", "As-tu déjà utilisé une fausse identité ?", "Quelle est la chose la plus illégale que tu aies faite dans un autre pays ?", "As-tu déjà piraté un compte ou un système informatique ?"],
+                '7': ["As-tu déjà été arrêté(e) pour un crime que tu n'as pas commis ?", "Quelle est la chose la plus illégale que tu aies faite pour de l'argent ?", "Raconte une fois où tu as été menacé(e) par un criminel.", "As-tu déjà été impliqué(e) dans un accident de la route avec délit de fuite ?", "Quel est le secret le plus sombre que tu partages avec un complice ?", "As-tu déjà été témoin d'un meurtre ou d'une tentative de meurtre ?", "Raconte une fois où tu as échappé de justesse à la prison.", "As-tu déjà été membre d'un gang ou d'une organisation criminelle ?", "Quelle est la chose la plus illégale que tu aies faite par amour ?", "As-tu déjà été victime d'un chantage ?"],
+                '8': ["As-tu déjà commis un crime avec une arme ?", "Quelle est la chose la plus illégale que tu aies faite qui a blessé quelqu'un ?", "Raconte une fois où tu as été en garde à vue.", "As-tu déjà été condamné(e) par la justice ?", "Quel est le plus grand secret que tu caches à la police ?", "As-tu déjà été impliqué(e) dans un trafic (drogue, armes, etc.) ?", "Raconte une fois où tu as dû choisir entre la prison et la trahison.", "As-tu déjà été en cavale ?", "Quelle est la chose la plus illégale que tu aies faite pour protéger ta famille ?", "As-tu déjà été payé(e) pour commettre un crime ?"],
+                '9': ["As-tu déjà pensé à tuer quelqu'un ?", "Quelle est la chose la plus illégale que tu aies faite et que tu regrettes le plus ?", "Raconte une fois où tu as été complice d'un crime grave.", "As-tu déjà été en prison ?", "Quel est le plus grand secret que tu emporteras dans ta tombe ?", "As-tu déjà été impliqué(e) dans un crime qui a fait la une des journaux ?", "Raconte une fois où tu as dû faire face à la mafia ou à un gang.", "As-tu déjà été témoin d'un crime et tu as menti à la police ?", "Quelle est la chose la plus illégale que tu aies faite et dont tu es fier(e) ?", "As-tu déjà été pardonné(e) pour un crime que tu as commis ?"],
+                '10': ["Si tu pouvais commettre un crime sans être puni(e), lequel serait-ce ?", "Quelle est la chose la plus illégale que tu ferais pour sauver un être cher ?", "Raconte une fois où tu as enfreint la loi et où tu t'es senti(e) vivant(e).", "As-tu déjà rêvé de devenir un criminel célèbre ?", "Quel est le plus grand secret que tu partages avec un criminel ?", "As-tu déjà été inspiré(e) par un criminel de fiction ?", "Raconte une fois où tu as dû choisir entre la loi et la morale.", "As-tu déjà été tenté(e) de rejoindre une organisation terroriste ?", "Quelle est la chose la plus illégale que tu aies apprise à faire ?", "As-tu déjà été fier(e) d'avoir enfreint la loi ?"],
+                'J': ["Si tu devais commettre un crime avec une personne dans cette pièce, qui serait ton/ta complice ?", "Quelle est la chose la plus illégale que tu aies faite en vacances ?", "Raconte une fois où tu as été pris(e) en flagrant délit.", "As-tu déjà volé quelque chose dans un hôtel ?", "Quel est le plus grand secret que tu caches à ton/ta meilleur(e) ami(e) concernant la loi ?", "As-tu déjà conduit une voiture volée ?", "Raconte une fois où tu as dû mentir à tes parents sur une activité illégale.", "As-tu déjà triché aux impôts ?", "Quelle est la chose la plus illégale que tu aies faite pour un pari ?", "As-tu déjà été banni(e) d'un lieu public ?"],
+                'Q': ["Si tu pouvais légaliser une drogue, laquelle serait-ce ?", "Quelle est la chose la plus illégale que tu aies faite à l'école ?", "Raconte une fois où tu as été impliqué(e) dans une émeute ou une manifestation violente.", "As-tu déjà volé de l'argent à tes parents ?", "Quel est le plus grand secret que tu caches à ton/ta patron(ne) concernant la loi ?", "As-tu déjà utilisé une fausse carte d'identité ?", "Raconte une fois où tu as dû cacher quelque chose d'illégal chez toi.", "As-tu déjà fait un faux témoignage pour aider un ami ?", "Quelle est la chose la plus illégale que tu aies faite par amour ?", "As-tu déjà été arrêté(e) à l'étranger ?"],
+                'K': ["Si tu pouvais gracier un criminel célèbre, qui serait-ce ?", "Quelle est la chose la plus illégale que tu aies faite pour ta carrière ?", "Raconte une fois où tu as été menacé(e) par la police.", "As-tu déjà volé un objet de grande valeur sentimentale ?", "Quel est le plus grand secret que tu caches à tes enfants concernant la loi ?", "As-tu déjà été impliqué(e) dans un accident et tu as menti sur les circonstances ?", "Raconte une fois où tu as dû transporter quelque chose d'illégal pour quelqu'un.", "As-tu déjà fait chanter quelqu'un avec une information illégale ?", "Quelle est la chose la plus illégale que tu aies faite par vengeance ?", "As-tu déjà été condamné(e) à une peine de prison avec sursis ?"],
+                'A': ["Si tu pouvais changer une loi, laquelle serait-ce ?", "Quelle est la chose la plus illégale que tu aies faite et que tu ne regretteras jamais ?", "Raconte une fois où tu as choisi la justice plutôt que la loi.", "As-tu déjà rêvé de devenir un justicier masqué ?", "Quel est le plus grand secret que tu partages avec un avocat ?", "As-tu déjà été impliqué(e) dans une affaire judiciaire qui a duré des années ?", "Raconte une fois où tu as dû faire face à un juge.", "As-tu déjà été pardonné(e) par une victime ?", "Quelle est la chose la plus illégale que tu aies apprise de tes erreurs ?", "As-tu déjà été fier(e) d'avoir été un hors-la-loi ?"]
+            }
+        };
 
-const QuestionDisplay = ({ historyItem, onNext, onCycleQuestion, isLastCard, onThemeClick }) => {
-    if (!historyItem) return null;
-    const { card, question } = historyItem;
-    return (
-        <div className="w-full max-w-lg mx-auto p-6 bg-gray-800 rounded-2xl shadow-2xl flex flex-col items-center gap-4 animate-fade-in">
-            <ThemeDisplay suit={card.suit} onClick={onThemeClick} />
-            <Card suit={card.suit} value={card.value} />
-            <p className="text-white text-xl sm:text-2xl text-center font-light leading-relaxed min-h-[6rem] flex items-center">{question}</p>
-            <div className="w-full flex flex-col gap-3 mt-2">
-                <button onClick={onCycleQuestion} className="w-full bg-gray-600 hover:bg-gray-500 text-white font-bold py-3 px-4 rounded-xl">Changer de question</button>
-                <button onClick={onNext} className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 px-4 rounded-xl">{isLastCard ? "Terminer la partie" : "Piocher la carte suivante"}</button>
-            </div>
-        </div>
-    );
-};
+        const THEME_DETAILS = {
+            '♥️': { name: 'Cœur', color: 'text-red-500', description: 'Sex, fantasmes, séduction. Tout ce qui touche à l\'intimité charnelle et au désir.' },
+            '♦️': { name: 'Social', color: 'text-red-500', description: 'Liens non-sexuels. Amour, amitié, famille, travail. Les dynamiques qui nous lient aux autres.' },
+            '♠️': { name: 'Karma', color: 'text-gray-800', description: 'Actions immorales. Coups bas, pensées inavouables, dilemmes moraux. Ce qui n\'est pas illégal, mais discutable.' },
+            '♣️': { name: 'Punk', color: 'text-gray-800', description: 'Actes illégaux ou de rébellion. Tout ce qui enfreint la loi ou défie ouvertement l\'autorité.' }
+        };
 
-const PhysicalMode = ({ onCardSelect }) => {
-    const [suit, setSuit] = useState(null);
-    const [value, setValue] = useState(null);
-    const handleSelect = () => { if (suit && value) { onCardSelect({ suit, value }); setSuit(null); setValue(null); } };
-    return (
-        <div className="w-full max-w-lg mx-auto p-6 bg-gray-800 rounded-2xl shadow-2xl flex flex-col items-center gap-6 animate-fade-in">
-            <h2 className="text-2xl font-bold text-white text-center">Sélectionnez la carte piochée</h2>
-            <div className="w-full"><p className="text-lg font-semibold text-gray-300 mb-2">Couleur :</p><div className="grid grid-cols-4 gap-3">{Object.keys(THEME_DETAILS).map(s => (<button key={s} onClick={() => setSuit(s)} className={`py-4 text-3xl rounded-lg transition-all duration-200 ${suit === s ? 'bg-indigo-600 text-white scale-110 shadow-lg' : 'bg-gray-700 text-white hover:bg-gray-600'}`}>{s}</button>))}</div></div>
-            <div className="w-full"><p className="text-lg font-semibold text-gray-300 mb-2">Valeur :</p><div className="grid grid-cols-auto-fit-100 gap-3">{Object.keys(questions[suit] || {}).map(v => (<button key={v} onClick={() => setValue(v)} className={`py-3 text-xl rounded-lg transition-all duration-200 ${value === v ? 'bg-indigo-600 text-white scale-110 shadow-lg' : 'bg-gray-700 text-white hover:bg-gray-600'}`}>{v}</button>))}</div></div>
-            <button onClick={handleSelect} disabled={!suit || !value} className="w-full mt-4 bg-green-600 hover:bg-green-500 text-white font-bold py-3 px-4 rounded-xl disabled:bg-gray-500 disabled:cursor-not-allowed">Voir la question</button>
-        </div>
-    );
-};
+        const generateDeck = () => {
+            const deck = [];
+            for (const suit in questions) {
+                for (const value in questions[suit]) {
+                    deck.push({ suit, value });
+                }
+            }
+            for (let i = deck.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [deck[i], deck[j]] = [deck[j], deck[i]];
+            }
+            return deck;
+        };
 
-const QuickPlayMode = ({ onThemeClick, onNewQuestion }) => {
-    const [currentQuestion, setCurrentQuestion] = useState({ question: '', suit: null });
+        const Card = ({ suit, value, small = false }) => {
+            const color = THEME_DETAILS[suit].color;
+            const sizeClasses = small ? 'w-20 h-28 sm:w-24 sm:h-36' : 'w-40 h-60 sm:w-48 sm:h-72';
+            const valueSize = small ? 'text-xl' : 'text-3xl';
+            const suitCenterSize = small ? 'text-4xl' : 'text-6xl';
+            return (
+                <div className={`${sizeClasses} bg-white rounded-xl shadow-2xl flex flex-col justify-between p-2 sm:p-3 transform transition-transform duration-500 hover:scale-105 relative flex-shrink-0`}>
+                    <div className={`${valueSize} font-bold ${color}`}>{value} {suit}</div>
+                    <div className={`${suitCenterSize} text-center font-bold ${color} absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2`}>{suit}</div>
+                    <div className={`${valueSize} font-bold ${color} self-end transform rotate-180`}>{value} {suit}</div>
+                </div>
+            );
+        };
 
-    const getNewQuestion = useCallback((suit) => {
-        let selectedSuit = suit;
-        if (suit === 'random') {
-            const suits = Object.keys(THEME_DETAILS);
-            selectedSuit = suits[Math.floor(Math.random() * suits.length)];
-        }
-        
-        const themeValues = Object.keys(questions[selectedSuit]);
-        const randomValue = themeValues[Math.floor(Math.random() * themeValues.length)];
-        const questionPool = questions[selectedSuit][randomValue];
-        const randomQuestion = questionPool[Math.floor(Math.random() * questionPool.length)];
-        
-        setCurrentQuestion({ question: randomQuestion, suit: selectedSuit });
-        onNewQuestion(randomQuestion, selectedSuit);
-    }, [onNewQuestion]);
-
-    useEffect(() => {
-        getNewQuestion('random');
-    }, []); // Changed dependency to empty array to run only once on mount
-
-    return (
-        <div className="w-full max-w-2xl mx-auto p-4 flex flex-col items-center gap-4 animate-fade-in">
-            <h2 className="text-2xl font-bold text-white text-center">Partie Rapide</h2>
-            <div className="w-full grid grid-cols-2 sm:grid-cols-4 gap-4">
-                {Object.entries(THEME_DETAILS).map(([suit, details]) => (
-                    <button key={suit} onClick={() => getNewQuestion(suit)} className="bg-gray-700 hover:bg-gray-600 text-white font-bold py-3 px-2 rounded-xl flex flex-col items-center justify-center gap-1">
-                        <span className={`text-4xl ${details.color}`}>{suit}</span>
-                        <span className="text-base">{details.name}</span>
-                    </button>
-                ))}
-            </div>
-            <div className="w-full mt-2 flex justify-center">
-                 <button onClick={() => getNewQuestion('random')} className="bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 px-2 rounded-xl flex flex-col items-center justify-center gap-1 w-full sm:w-1/2">
-                    <span className="text-4xl">🎲</span>
-                    <span className="text-base">Aléatoire</span>
+        const ThemeDisplay = ({ suit, onClick }) => {
+            const theme = THEME_DETAILS[suit];
+            return (
+                <button onClick={onClick} className="flex items-center gap-2 bg-gray-700 px-4 py-2 rounded-full hover:bg-gray-600 transition-colors">
+                    <span className={`text-2xl ${theme.color}`}>{suit}</span>
+                    <span className="text-white font-bold text-lg">{theme.name}</span>
                 </button>
-            </div>
-            {currentQuestion.suit && (
-                <div className="w-full mt-6 flex flex-col items-center gap-4">
-                    <ThemeDisplay suit={currentQuestion.suit} onClick={onThemeClick} />
-                    <div className="w-full bg-gray-800 rounded-lg p-8 flex justify-center items-center min-h-[12rem] shadow-2xl">
-                        <p className="text-white text-2xl text-center font-light leading-relaxed">{currentQuestion.question}</p>
+            );
+        };
+
+        const QuestionDisplay = ({ historyItem, onNext, onCycleQuestion, isLastCard, onThemeClick }) => {
+            if (!historyItem) return null;
+            const { card, question } = historyItem;
+            return (
+                <div className="w-full max-w-lg mx-auto p-6 bg-gray-800 rounded-2xl shadow-2xl flex flex-col items-center gap-4 animate-fade-in">
+                    <ThemeDisplay suit={card.suit} onClick={onThemeClick} />
+                    <Card suit={card.suit} value={card.value} />
+                    <p className="text-white text-xl sm:text-2xl text-center font-light leading-relaxed min-h-[6rem] flex items-center">{question}</p>
+                    <div className="w-full flex flex-col gap-3 mt-2">
+                        <button onClick={onCycleQuestion} className="w-full bg-gray-600 hover:bg-gray-500 text-white font-bold py-3 px-4 rounded-xl">Changer de question</button>
+                        <button onClick={onNext} className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 px-4 rounded-xl">{isLastCard ? "Terminer la partie" : "Piocher la carte suivante"}</button>
                     </div>
                 </div>
-            )}
-        </div>
-    );
-};
-
-
-const Menu = ({ onSelectMode, onShowRules }) => (
-    <div className="w-full max-w-sm mx-auto p-6 flex flex-col items-center gap-6 animate-fade-in">
-        <header className="text-center"><h1 className="text-6xl font-black text-white tracking-tighter">Briz</h1><p className="text-indigo-300 mt-2 text-lg">Le jeu pour brizer la glace.</p></header>
-        <div className="w-full flex flex-col gap-4 mt-8">
-            <button onClick={() => onSelectMode('physical')} className="w-full bg-gray-700 hover:bg-gray-600 text-white font-bold py-4 px-4 rounded-xl text-left flex items-center gap-4"><span className="text-4xl">🃏</span><div><p className="text-lg">J'ai un jeu de cartes</p><p className="text-sm font-light text-gray-300">Utilisez vos propres cartes.</p></div></button>
-            <button onClick={() => onSelectMode('virtual')} className="w-full bg-gray-700 hover:bg-gray-600 text-white font-bold py-4 px-4 rounded-xl text-left flex items-center gap-4"><span className="text-4xl">📱</span><div><p className="text-lg">Tirage de cartes</p><p className="text-sm font-light text-gray-300">Laissez l'app gérer le tirage.</p></div></button>
-            <button onClick={() => onSelectMode('quickplay')} className="w-full bg-gray-700 hover:bg-gray-600 text-white font-bold py-4 px-4 rounded-xl text-left flex items-center gap-4"><span className="text-4xl">⚡️</span><div><p className="text-lg">Partie Rapide</p><p className="text-sm font-light text-gray-300">Une question, sans attendre.</p></div></button>
-        </div>
-        <button onClick={onShowRules} className="text-indigo-300 hover:text-indigo-200 mt-8">Règles du jeu</button>
-    </div>
-);
-
-const History = ({ history, onClose }) => (
-    <div className="fixed inset-0 bg-black bg-opacity-70 flex justify-center items-center z-50 animate-fade-in-fast" onClick={onClose}>
-        <div className="bg-gray-800 rounded-2xl shadow-2xl w-full max-w-2xl h-[80vh] flex flex-col p-6" onClick={e => e.stopPropagation()}>
-            <div className="flex justify-between items-center mb-4"><h2 className="text-2xl font-bold text-white">Historique des questions</h2><button onClick={onClose} className="text-gray-400 hover:text-white text-2xl">&times;</button></div>
-            <div className="overflow-y-auto pr-2">{history.length === 0 ? (<p className="text-gray-400 text-center mt-8">Aucune question pour le moment.</p>) : (<ul className="space-y-4">{history.map((item, index) => (<li key={index} className="bg-gray-700 p-4 rounded-lg flex items-start gap-4"><Card suit={item.card.suit} value={item.card.value} small={true} /><p className="text-white text-lg flex-1">{item.question}</p></li>))}</ul>)}</div>
-        </div>
-    </div>
-);
-
-const ConfirmationModal = ({ onConfirm, onCancel }) => (
-    <div className="fixed inset-0 bg-black bg-opacity-70 flex justify-center items-center z-50 animate-fade-in-fast">
-        <div className="bg-gray-800 rounded-2xl shadow-2xl w-full max-w-sm p-8 text-center" onClick={e => e.stopPropagation()}>
-            <h2 className="text-2xl font-bold text-white mb-4">Quitter la partie ?</h2>
-            <p className="text-gray-300 mb-8">Votre progression sera effacée. Êtes-vous sûr ?</p>
-            <div className="flex justify-center gap-4"><button onClick={onCancel} className="bg-gray-600 hover:bg-gray-500 text-white font-bold py-2 px-6 rounded-lg">Annuler</button><button onClick={onConfirm} className="bg-red-600 hover:bg-red-500 text-white font-bold py-2 px-6 rounded-lg">Confirmer</button></div>
-        </div>
-    </div>
-);
-
-const EndGameScreen = ({ onRestart }) => (
-    <div className="w-full max-w-lg mx-auto p-8 bg-gray-800 rounded-2xl shadow-2xl flex flex-col items-center gap-6 animate-fade-in text-center">
-        <h2 className="text-4xl font-bold text-white">Partie terminée !</h2>
-        <p className="text-gray-300 text-lg">Vous avez répondu à toutes les questions. J'espère que vous en avez appris plus les uns sur les autres !</p>
-        <button onClick={onRestart} className="w-full mt-4 bg-green-600 hover:bg-green-500 text-white font-bold py-3 px-4 rounded-xl">Faire une nouvelle partie</button>
-    </div>
-);
-
-const ThemeModal = ({ onClose }) => (
-    <div className="fixed inset-0 bg-black bg-opacity-70 flex justify-center items-center z-50 animate-fade-in-fast" onClick={onClose}>
-        <div className="bg-gray-800 rounded-2xl shadow-2xl w-full max-w-2xl p-6 m-4" onClick={e => e.stopPropagation()}>
-            <div className="flex justify-between items-center mb-6"><h2 className="text-3xl font-bold text-white">Les Thèmes de Briz</h2><button onClick={onClose} className="text-gray-400 hover:text-white text-3xl">&times;</button></div>
-            <div className="space-y-4">{Object.entries(THEME_DETAILS).map(([suit, details]) => (<div key={suit} className="bg-gray-700 p-4 rounded-lg"><h3 className="text-2xl font-bold flex items-center gap-3"><span className={details.color}>{suit}</span><span className="text-white">{details.name}</span></h3><p className="text-gray-300 mt-1 ml-10">{details.description}</p></div>))}</div>
-        </div>
-    </div>
-);
-
-function App() {
-    const [mode, setMode] = useState('menu');
-    const [deck, setDeck] = useState([]);
-    const [history, setHistory] = useState([]);
-    const [isGameFinished, setGameFinished] = useState(false);
-    const [showHistory, setShowHistory] = useState(false);
-    const [showResetModal, setShowResetModal] = useState(false);
-    const [showThemeModal, setShowThemeModal] = useState(false);
-    const [currentCard, setCurrentCard] = useState(null);
-
-    useEffect(() => {
-        try {
-            const savedState = JSON.parse(localStorage.getItem('brizGameState_v8'));
-            if (savedState) {
-                setMode(savedState.mode || 'menu');
-                setDeck(savedState.deck && savedState.deck.length > 0 ? savedState.deck : generateDeck());
-                setHistory(savedState.history || []);
-                setGameFinished(savedState.isGameFinished || false);
-                setCurrentCard(savedState.currentCard || null);
-            } else {
-                setDeck(generateDeck());
-            }
-        } catch (error) {
-            console.error("Failed to load state", error);
-            setDeck(generateDeck());
-        }
-    }, []);
-
-    useEffect(() => {
-        const gameState = { mode, deck, history, isGameFinished, currentCard };
-        localStorage.setItem('brizGameState_v8', JSON.stringify(gameState));
-    }, [mode, deck, history, isGameFinished, currentCard]);
-
-    const resetGame = () => {
-        localStorage.removeItem('brizGameState_v8');
-        setMode('menu');
-        setDeck(generateDeck());
-        setHistory([]);
-        setGameFinished(false);
-        setCurrentCard(null);
-        setShowResetModal(false);
-    };
-
-    const drawVirtualCard = useCallback(() => {
-        if (deck.length > 0) {
-            const card = deck[0];
-            const question = questions[card.suit][card.value][0];
-            setHistory(prev => [{ card, question, qIndex: 0 }, ...prev]);
-            setDeck(d => d.slice(1));
-        }
-    }, [deck]);
-
-    useEffect(() => {
-        if (mode === 'virtual' && history.length === 0 && !isGameFinished && deck.length > 0) {
-            drawVirtualCard();
-        }
-    }, [mode, history.length, isGameFinished, drawVirtualCard, deck.length]);
-
-    const handlePhysicalCardSelection = (card) => {
-        const question = questions[card.suit][card.value][0];
-        const newItem = { card, question, qIndex: 0 };
-        setCurrentCard(newItem);
-        setHistory(prev => [newItem, ...prev]);
-    };
-    
-    const addQuickPlayQuestionToHistory = useCallback((question, suit) => {
-        const newItem = {
-            card: { suit, value: '⚡️' },
-            question,
-            qIndex: 0
+            );
         };
-        setHistory(prev => [newItem, ...prev]);
-    }, []);
 
-    const cycleQuestion = () => {
-        const activeItem = mode === 'physical' ? currentCard : history[0];
-        if (!activeItem || activeItem.card.value === '⚡️') return;
+        const PhysicalMode = ({ onCardSelect }) => {
+            const [suit, setSuit] = useState(null);
+            const [value, setValue] = useState(null);
+            const handleSelect = () => { if (suit && value) { onCardSelect({ suit, value }); setSuit(null); setValue(null); } };
+            return (
+                <div className="w-full max-w-lg mx-auto p-6 bg-gray-800 rounded-2xl shadow-2xl flex flex-col items-center gap-6 animate-fade-in">
+                    <h2 className="text-2xl font-bold text-white text-center">Sélectionnez la carte piochée</h2>
+                    <div className="w-full"><p className="text-lg font-semibold text-gray-300 mb-2">Couleur :</p><div className="grid grid-cols-4 gap-3">{Object.keys(THEME_DETAILS).map(s => (<button key={s} onClick={() => setSuit(s)} className={`py-4 text-3xl rounded-lg transition-all duration-200 ${suit === s ? 'bg-indigo-600 text-white scale-110 shadow-lg' : 'bg-gray-700 text-white hover:bg-gray-600'}`}>{s}</button>))}</div></div>
+                    <div className="w-full"><p className="text-lg font-semibold text-gray-300 mb-2">Valeur :</p><div className="grid grid-cols-auto-fit-100 gap-3">{Object.keys(questions[suit] || {}).map(v => (<button key={v} onClick={() => setValue(v)} className={`py-3 text-xl rounded-lg transition-all duration-200 ${value === v ? 'bg-indigo-600 text-white scale-110 shadow-lg' : 'bg-gray-700 text-white hover:bg-gray-600'}`}>{v}</button>))}</div></div>
+                    <button onClick={handleSelect} disabled={!suit || !value} className="w-full mt-4 bg-green-600 hover:bg-green-500 text-white font-bold py-3 px-4 rounded-xl disabled:bg-gray-500 disabled:cursor-not-allowed">Voir la question</button>
+                </div>
+            );
+        };
 
-        const { card, qIndex } = activeItem;
-        const questionPool = questions[card.suit][card.value];
-        const newQIndex = (qIndex + 1) % questionPool.length;
-        const newQuestion = questionPool[newQIndex];
-        
-        const newItem = { card, question: newQuestion, qIndex: newQIndex };
+        const QuickPlayMode = ({ onThemeClick, onNewQuestion }) => {
+            const [currentQuestion, setCurrentQuestion] = useState({ question: '', suit: null });
 
-        if (mode === 'physical') {
-            setCurrentCard(newItem);
-            setHistory(prev => [newItem, ...prev.slice(1)]);
-        } else {
-            setHistory(prev => [newItem, ...prev.slice(1)]);
-        }
-    };
-    
-    const handleNextQuestion = () => {
-        if (mode === 'virtual') {
-            if (deck.length === 0) {
-                setGameFinished(true);
-            } else {
-                drawVirtualCard();
-            }
-        } else {
-            setCurrentCard(null);
-        }
-    };
+            const getNewQuestion = useCallback((suit) => {
+                let selectedSuit = suit;
+                if (suit === 'random') {
+                    const suits = Object.keys(THEME_DETAILS);
+                    selectedSuit = suits[Math.floor(Math.random() * suits.length)];
+                }
+                
+                const themeValues = Object.keys(questions[selectedSuit]);
+                const randomValue = themeValues[Math.floor(Math.random() * themeValues.length)];
+                const questionPool = questions[selectedSuit][randomValue];
+                const randomQuestion = questionPool[Math.floor(Math.random() * questionPool.length)];
+                
+                setCurrentQuestion({ question: randomQuestion, suit: selectedSuit });
+                onNewQuestion(randomQuestion, selectedSuit);
+            }, [onNewQuestion]);
 
-    const renderContent = () => {
-        if (isGameFinished) return <EndGameScreen onRestart={resetGame} />;
+            useEffect(() => {
+                getNewQuestion('random');
+            }, []); // Correctif: tableau de dépendances vide pour n'exécuter qu'une fois au montage.
 
-        const activeItem = mode === 'physical' ? currentCard : history[0];
+            return (
+                <div className="w-full max-w-2xl mx-auto p-4 flex flex-col items-center gap-4 animate-fade-in">
+                    <h2 className="text-2xl font-bold text-white text-center">Partie Rapide</h2>
+                    <div className="w-full grid grid-cols-2 sm:grid-cols-4 gap-4">
+                        {Object.entries(THEME_DETAILS).map(([suit, details]) => (
+                            <button key={suit} onClick={() => getNewQuestion(suit)} className="bg-gray-700 hover:bg-gray-600 text-white font-bold py-3 px-2 rounded-xl flex flex-col items-center justify-center gap-1">
+                                <span className={`text-4xl ${details.color}`}>{suit}</span>
+                                <span className="text-base">{details.name}</span>
+                            </button>
+                        ))}
+                    </div>
+                    <div className="w-full mt-2 flex justify-center">
+                         <button onClick={() => getNewQuestion('random')} className="bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 px-2 rounded-xl flex flex-col items-center justify-center gap-1 w-full sm:w-1/2">
+                            <span className="text-4xl">🎲</span>
+                            <span className="text-base">Aléatoire</span>
+                        </button>
+                    </div>
+                    {currentQuestion.suit && (
+                        <div className="w-full mt-6 flex flex-col items-center gap-4">
+                            <ThemeDisplay suit={currentQuestion.suit} onClick={onThemeClick} />
+                            <div className="w-full bg-gray-800 rounded-lg p-8 flex justify-center items-center min-h-[12rem] shadow-2xl">
+                                <p className="text-white text-2xl text-center font-light leading-relaxed">{currentQuestion.question}</p>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        };
 
-        if ((mode === 'virtual' || mode === 'physical') && activeItem) {
-            return <QuestionDisplay historyItem={activeItem} onNext={handleNextQuestion} onCycleQuestion={cycleQuestion} isLastCard={deck.length === 0 && mode === 'virtual'} onThemeClick={() => setShowThemeModal(true)} />;
-        }
-        
-        switch (mode) {
-            case 'physical': return <PhysicalMode onCardSelect={handlePhysicalCardSelection} />;
-            case 'quickplay': return <QuickPlayMode onThemeClick={() => setShowThemeModal(true)} onNewQuestion={addQuickPlayQuestionToHistory} />;
-            case 'menu': default: return <Menu onSelectMode={setMode} onShowRules={() => setShowThemeModal(true)} />;
-        }
-    };
 
-    return (
-        <main className="bg-gray-900 min-h-screen w-full flex flex-col items-center justify-center p-4 font-sans relative">
-            <div className="absolute top-4 w-full flex justify-between items-center px-4 max-w-4xl mx-auto">
-                {mode !== 'menu' && !isGameFinished ? (<button onClick={() => setShowResetModal(true)} className="bg-gray-700 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-full shadow-lg z-10">&larr; Menu</button>) : <div/>}
-                {mode === 'virtual' && !isGameFinished && (<div className="text-gray-300 text-lg font-semibold bg-gray-700 px-4 py-2 rounded-full z-10">Cartes : {deck.length}</div>)}
-                {mode !== 'menu' && history.length > 0 && !isGameFinished ? (<button onClick={() => setShowHistory(true)} className="bg-gray-700 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-full shadow-lg z-10">Historique</button>) : <div/>}
+        const Menu = ({ onSelectMode, onShowRules }) => (
+            <div className="w-full max-w-sm mx-auto p-6 flex flex-col items-center gap-6 animate-fade-in">
+                <header className="text-center"><h1 className="text-6xl font-black text-white tracking-tighter">Briz</h1><p className="text-indigo-300 mt-2 text-lg">Le jeu pour brizer la glace.</p></header>
+                <div className="w-full flex flex-col gap-4 mt-8">
+                    <button onClick={() => onSelectMode('physical')} className="w-full bg-gray-700 hover:bg-gray-600 text-white font-bold py-4 px-4 rounded-xl text-left flex items-center gap-4"><span className="text-4xl">🃏</span><div><p className="text-lg">J'ai un jeu de cartes</p><p className="text-sm font-light text-gray-300">Utilisez vos propres cartes.</p></div></button>
+                    <button onClick={() => onSelectMode('virtual')} className="w-full bg-gray-700 hover:bg-gray-600 text-white font-bold py-4 px-4 rounded-xl text-left flex items-center gap-4"><span className="text-4xl">📱</span><div><p className="text-lg">Tirage de cartes</p><p className="text-sm font-light text-gray-300">Laissez l'app gérer le tirage.</p></div></button>
+                    <button onClick={() => onSelectMode('quickplay')} className="w-full bg-gray-700 hover:bg-gray-600 text-white font-bold py-4 px-4 rounded-xl text-left flex items-center gap-4"><span className="text-4xl">⚡️</span><div><p className="text-lg">Partie Rapide</p><p className="text-sm font-light text-gray-300">Une question, sans attendre.</p></div></button>
+                </div>
+                <button onClick={onShowRules} className="text-indigo-300 hover:text-indigo-200 mt-8">Règles du jeu</button>
             </div>
-            
-            {showHistory && <History history={history} onClose={() => setShowHistory(false)} />}
-            {showResetModal && <ConfirmationModal onConfirm={resetGame} onCancel={() => setShowResetModal(false)} />}
-            {showThemeModal && <ThemeModal onClose={() => setShowThemeModal(false)} />}
-            
-            <div className="w-full flex-grow flex items-center justify-center">{renderContent()}</div>
-            <footer className="w-full text-center text-gray-600 text-sm py-4">Fait avec ♥️ pour des soirées mémorables.</footer>
-        </main>
-    );
-}
+        );
 
-const container = document.getElementById('root');
-const root = ReactDOM.createRoot(container);
-root.render(<App />);
+        const History = ({ history, onClose }) => (
+            <div className="fixed inset-0 bg-black bg-opacity-70 flex justify-center items-center z-50 animate-fade-in-fast" onClick={onClose}>
+                <div className="bg-gray-800 rounded-2xl shadow-2xl w-full max-w-2xl h-[80vh] flex flex-col p-6" onClick={e => e.stopPropagation()}>
+                    <div className="flex justify-between items-center mb-4"><h2 className="text-2xl font-bold text-white">Historique des questions</h2><button onClick={onClose} className="text-gray-400 hover:text-white text-2xl">&times;</button></div>
+                    <div className="overflow-y-auto pr-2">{history.length === 0 ? (<p className="text-gray-400 text-center mt-8">Aucune question pour le moment.</p>) : (<ul className="space-y-4">{history.map((item, index) => (<li key={index} className="bg-gray-700 p-4 rounded-lg flex items-start gap-4"><Card suit={item.card.suit} value={item.card.value} small={true} /><p className="text-white text-lg flex-1">{item.question}</p></li>))}</ul>)}</div>
+                </div>
+            </div>
+        );
 
+        const ConfirmationModal = ({ onConfirm, onCancel }) => (
+            <div className="fixed inset-0 bg-black bg-opacity-70 flex justify-center items-center z-50 animate-fade-in-fast">
+                <div className="bg-gray-800 rounded-2xl shadow-2xl w-full max-w-sm p-8 text-center" onClick={e => e.stopPropagation()}>
+                    <h2 className="text-2xl font-bold text-white mb-4">Quitter la partie ?</h2>
+                    <p className="text-gray-300 mb-8">Votre progression sera effacée. Êtes-vous sûr ?</p>
+                    <div className="flex justify-center gap-4"><button onClick={onCancel} className="bg-gray-600 hover:bg-gray-500 text-white font-bold py-2 px-6 rounded-lg">Annuler</button><button onClick={onConfirm} className="bg-red-600 hover:bg-red-500 text-white font-bold py-2 px-6 rounded-lg">Confirmer</button></div>
+                </div>
+            </div>
+        );
+
+        const EndGameScreen = ({ onRestart }) => (
+            <div className="w-full max-w-lg mx-auto p-8 bg-gray-800 rounded-2xl shadow-2xl flex flex-col items-center gap-6 animate-fade-in text-center">
+                <h2 className="text-4xl font-bold text-white">Partie terminée !</h2>
+                <p className="text-gray-300 text-lg">Vous avez répondu à toutes les questions. J'espère que vous en avez appris plus les uns sur les autres !</p>
+                <button onClick={onRestart} className="w-full mt-4 bg-green-600 hover:bg-green-500 text-white font-bold py-3 px-4 rounded-xl">Faire une nouvelle partie</button>
+            </div>
+        );
+
+        const ThemeModal = ({ onClose }) => (
+            <div className="fixed inset-0 bg-black bg-opacity-70 flex justify-center items-center z-50 animate-fade-in-fast" onClick={onClose}>
+                <div className="bg-gray-800 rounded-2xl shadow-2xl w-full max-w-2xl p-6 m-4" onClick={e => e.stopPropagation()}>
+                    <div className="flex justify-between items-center mb-6"><h2 className="text-3xl font-bold text-white">Les Thèmes de Briz</h2><button onClick={onClose} className="text-gray-400 hover:text-white text-3xl">&times;</button></div>
+                    <div className="space-y-4">{Object.entries(THEME_DETAILS).map(([suit, details]) => (<div key={suit} className="bg-gray-700 p-4 rounded-lg"><h3 className="text-2xl font-bold flex items-center gap-3"><span className={details.color}>{suit}</span><span className="text-white">{details.name}</span></h3><p className="text-gray-300 mt-1 ml-10">{details.description}</p></div>))}</div>
+                </div>
+            </div>
+        );
+
+        function App() {
+            const [mode, setMode] = useState('menu');
+            const [deck, setDeck] = useState([]);
+            const [history, setHistory] = useState([]);
+            const [isGameFinished, setGameFinished] = useState(false);
+            const [showHistory, setShowHistory] = useState(false);
+            const [showResetModal, setShowResetModal] = useState(false);
+            const [showThemeModal, setShowThemeModal] = useState(false);
+            const [currentCard, setCurrentCard] = useState(null);
+
+            useEffect(() => {
+                try {
+                    const savedState = JSON.parse(localStorage.getItem('brizGameState_v8'));
+                    if (savedState) {
+                        setMode(savedState.mode || 'menu');
+                        setDeck(savedState.deck && savedState.deck.length > 0 ? savedState.deck : generateDeck());
+                        setHistory(savedState.history || []);
+                        setGameFinished(savedState.isGameFinished || false);
+                        setCurrentCard(savedState.currentCard || null);
+                    } else {
+                        setDeck(generateDeck());
+                    }
+                } catch (error) {
+                    console.error("Failed to load state", error);
+                    setDeck(generateDeck());
+                }
+            }, []);
+
+            useEffect(() => {
+                const gameState = { mode, deck, history, isGameFinished, currentCard };
+                localStorage.setItem('brizGameState_v8', JSON.stringify(gameState));
+            }, [mode, deck, history, isGameFinished, currentCard]);
+
+            const resetGame = () => {
+                localStorage.removeItem('brizGameState_v8');
+                setMode('menu');
+                setDeck(generateDeck());
+                setHistory([]);
+                setGameFinished(false);
+                setCurrentCard(null);
+                setShowResetModal(false);
+            };
+
+            const drawVirtualCard = useCallback(() => {
+                if (deck.length > 0) {
+                    const card = deck[0];
+                    const question = questions[card.suit][card.value][0];
+                    setHistory(prev => [{ card, question, qIndex: 0 }, ...prev]);
+                    setDeck(d => d.slice(1));
+                }
+            }, [deck]);
+
+            useEffect(() => {
+                if (mode === 'virtual' && history.length === 0 && !isGameFinished && deck.length > 0) {
+                    drawVirtualCard();
+                }
+            }, [mode, history.length, isGameFinished, drawVirtualCard, deck.length]);
+
+            const handlePhysicalCardSelection = (card) => {
+                const question = questions[card.suit][card.value][0];
+                const newItem = { card, question, qIndex: 0 };
+                setCurrentCard(newItem);
+                setHistory(prev => [newItem, ...prev]);
+            };
+            
+            const addQuickPlayQuestionToHistory = useCallback((question, suit) => {
+                const newItem = {
+                    card: { suit, value: '⚡️' },
+                    question,
+                    qIndex: 0
+                };
+                setHistory(prev => [newItem, ...prev]);
+            }, []);
+
+            const cycleQuestion = () => {
+                const activeItem = mode === 'physical' ? currentCard : history[0];
+                if (!activeItem || activeItem.card.value === '⚡️') return;
+
+                const { card, qIndex } = activeItem;
+                const questionPool = questions[card.suit][card.value];
+                const newQIndex = (qIndex + 1) % questionPool.length;
+                const newQuestion = questionPool[newQIndex];
+                
+                const newItem = { card, question: newQuestion, qIndex: newQIndex };
+
+                if (mode === 'physical') {
+                    setCurrentCard(newItem);
+                    setHistory(prev => [newItem, ...prev.slice(1)]);
+                } else {
+                    setHistory(prev => [newItem, ...prev.slice(1)]);
+                }
+            };
+            
+            const handleNextQuestion = () => {
+                if (mode === 'virtual') {
+                    if (deck.length === 0) {
+                        setGameFinished(true);
+                    } else {
+                        drawVirtualCard();
+                    }
+                } else {
+                    setCurrentCard(null);
+                }
+            };
+
+            const renderContent = () => {
+                if (isGameFinished) return <EndGameScreen onRestart={resetGame} />;
+
+                const activeItem = mode === 'physical' ? currentCard : history[0];
+
+                if ((mode === 'virtual' || mode === 'physical') && activeItem) {
+                    return <QuestionDisplay historyItem={activeItem} onNext={handleNextQuestion} onCycleQuestion={cycleQuestion} isLastCard={deck.length === 0 && mode === 'virtual'} onThemeClick={() => setShowThemeModal(true)} />;
+                }
+                
+                switch (mode) {
+                    case 'physical': return <PhysicalMode onCardSelect={handlePhysicalCardSelection} />;
+                    case 'quickplay': return <QuickPlayMode onThemeClick={() => setShowThemeModal(true)} onNewQuestion={addQuickPlayQuestionToHistory} />;
+                    case 'menu': default: return <Menu onSelectMode={setMode} onShowRules={() => setShowThemeModal(true)} />;
+                }
+            };
+
+            return (
+                <main className="bg-gray-900 min-h-screen w-full flex flex-col items-center justify-center p-4 font-sans relative">
+                    <div className="absolute top-4 w-full flex justify-between items-center px-4 max-w-4xl mx-auto">
+                        {mode !== 'menu' && !isGameFinished ? (<button onClick={() => setShowResetModal(true)} className="bg-gray-700 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-full shadow-lg z-10">&larr; Menu</button>) : <div/>}
+                        {mode === 'virtual' && !isGameFinished && (<div className="text-gray-300 text-lg font-semibold bg-gray-700 px-4 py-2 rounded-full z-10">Cartes : {deck.length}</div>)}
+                        {mode !== 'menu' && history.length > 0 && !isGameFinished ? (<button onClick={() => setShowHistory(true)} className="bg-gray-700 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-full shadow-lg z-10">Historique</button>) : <div/>}
+                    </div>
+                    
+                    {showHistory && <History history={history} onClose={() => setShowHistory(false)} />}
+                    {showResetModal && <ConfirmationModal onConfirm={resetGame} onCancel={() => setShowResetModal(false)} />}
+                    {showThemeModal && <ThemeModal onClose={() => setShowThemeModal(false)} />}
+                    
+                    <div className="w-full flex-grow flex items-center justify-center">{renderContent()}</div>
+                    <footer className="w-full text-center text-gray-600 text-sm py-4">Made with 🍆 by KmeCnin</footer>
+                </main>
+            );
+        }
+        
+        const container = document.getElementById('root');
+        const root = ReactDOM.createRoot(container);
+        root.render(<App />);
+
+    </script>
+</body>
+</html>
