@@ -10,7 +10,8 @@ const urlsToCache = [
   'https://unpkg.com/react@18/umd/react.development.js',
   'https://unpkg.com/react-dom@18/umd/react-dom.development.js',
   'https://unpkg.com/@babel/standalone/babel.min.js',
-  'https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;700;900&display=swap'
+  'https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;700;900&display=swap',
+  'favicon.png' // Ajout du favicon au cache
 ];
 
 // Étape 1: Installation du Service Worker
