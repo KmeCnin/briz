@@ -1,5 +1,5 @@
 // Nom du cache
-const CACHE_NAME = 'briz-cache-v4';
+const CACHE_NAME = 'briz-cache-v5';
 
 // Fichiers à mettre en cache lors de l'installation
 // On met en cache les ressources de base pour que l'app se lance hors ligne.
